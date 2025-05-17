@@ -8,7 +8,8 @@ from   flask_migrate import Migrate
 from   flask_minify  import Minify
 from   sys import exit
 
-from apps.config import config_dict
+from apps.config import config_dict, Config
+from apps.authentication.models import Users
 from apps import create_app, db
 
 # WARNING: Don't run with debug turned on in production!
@@ -55,4 +56,10 @@ if DEBUG:
     app.logger.info('DBMS             = ' + app_config.SQLALCHEMY_DATABASE_URI)
 
 if __name__ == "__main__":
+    with app.app_context():
+        # Create Admin User
+        adminuser = Users(username='admin', email=Config.ADMIN_EMAIL, password=Config.ADMIN_PASS)
+        db.session.add(adminuser)
+        db.session.commit()
+
     app.run()

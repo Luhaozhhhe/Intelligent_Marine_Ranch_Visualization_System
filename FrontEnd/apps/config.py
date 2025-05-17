@@ -24,6 +24,10 @@ class Config(object):
     # Set up the App SECRET_KEY
     SECRET_KEY  = os.getenv('SECRET_KEY', 'S3cret_999')
 
+    # Admin information
+    ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@admin.com')
+    ADMIN_PASS  = os.getenv('ADMIN_PASS', 'admin')
+
     # Social AUTH context
     SOCIAL_AUTH_GITHUB  = False
 
