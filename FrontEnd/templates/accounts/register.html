@@ -15,7 +15,7 @@
           <div class="col-lg-5 text-center mx-auto">
             <h1 class="text-white mb-2 mt-5">Welcome!</h1>
             <p class="text-lead text-white">
-              Open-Source Seed Project
+              海洋牧场智慧可视化系统
             </p>
           </div>
         </div>
@@ -26,7 +26,7 @@
         <div class="col-xl-4 col-lg-5 col-md-7 mx-auto">
           <div class="card z-index-0">
             <div class="card-header text-center pt-4">
-              <h5>Register</h5>
+              <h5>注册</h5>
             </div>
             <div class="row px-xl-5 px-sm-4 px-3">
               <div class="mt-2 position-relative text-center">
@@ -34,7 +34,7 @@
                   {% if msg %}
                     <span class="text-info">{{ msg | safe }}</span>
                   {% else %}
-                    Add your credentials
+                    填写你的账号和密码
                   {% endif %}                  
                 </p>
               </div>
@@ -69,10 +69,10 @@
                     </label>
                   </div>
                   <div class="text-center">
-                    <button type="submit" name="register" class="btn bg-gradient-dark w-100 my-4 mb-2">Sign UP</button>
+                    <button type="submit" name="register" class="btn bg-gradient-dark w-100 my-4 mb-2">注册</button>
                   </div>
                   <p class="text-sm mt-3 mb-0 text-center">
-                    Already have an account? <a href="{{ url_for('authentication_blueprint.login') }}" class="text-dark font-weight-bolder">Sign IN</a>
+                    已经有账号了？ <a href="{{ url_for('authentication_blueprint.login') }}" class="text-dark font-weight-bolder">登录</a>
                   </p>
                 </form>
 
@@ -130,8 +130,8 @@
       <div class="row">
         <div class="col-8 mx-auto text-center mt-1">
           <p class="mb-0 text-secondary">
-            &copy; <a href="https://www.creative-tim.com?AFFILIATE=128200" class="font-weight-bold" target="_blank">Creative Tim</a>
-            - Coded by AppSeed.
+            &copy; <a href="https://github.com/Luhaozhhhe/Intelligent_Marine_Ranch_Visualization_System" class="font-weight-bold" target="_blank">南开大学软件工程小组</a>
+            - Coded by Team2.
           </p>
         </div>
       </div>
