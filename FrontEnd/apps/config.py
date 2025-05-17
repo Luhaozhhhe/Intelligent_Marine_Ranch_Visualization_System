@@ -13,6 +13,9 @@ class Config(object):
     USERS_ROLES  = { 'ADMIN'  :1 , 'USER'      : 2 }
     USERS_STATUS = { 'ACTIVE' :1 , 'SUSPENDED' : 2 }
     
+    # assets folder
+    ASSETS_ROOT           = "static/assets"
+
     # celery 
     CELERY_BROKER_URL     = "redis://localhost:6379"
     CELERY_RESULT_BACKEND = "redis://localhost:6379"
