@@ -121,6 +121,22 @@
           </div>
         </div>
 
+        <!-- 在 "设备情况" 卡片后面添加新的行 -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header pb-0 p-3">
+                <div class="d-flex justify-content-between">
+                  <h6 class="mb-0">渔场定位</h6>
+                </div>
+              </div>
+              <div class="card-body p-3">
+                <div id="mapContainer" style="height: 400px; width: 100%; border-radius: 10px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       <div class="row mt-4">
         <div class="col-lg-7 mb-lg-0 mb-4">
           <div class="card z-index-2 h-100">
@@ -553,6 +569,9 @@
   color: #fb6340 !important;
 }
 </style>
+
+
+
 
 {% endblock javascripts %}
 

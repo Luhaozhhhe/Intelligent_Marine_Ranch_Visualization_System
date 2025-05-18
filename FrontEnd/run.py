@@ -36,7 +36,7 @@ app = create_app(app_config)
 
 # fish.csv
 # CSV 文件路径
-FISH_CSV_PATH = os.path.join('..', 'Data', 'Fish.csv')
+FISH_CSV_PATH = os.path.join('Data', 'Fish.csv')
 
 # 读取数据
 fish_data = pd.read_csv(FISH_CSV_PATH)
