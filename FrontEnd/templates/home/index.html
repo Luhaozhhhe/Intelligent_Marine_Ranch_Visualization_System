@@ -1,6 +1,6 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} Dashboard {% endblock title %}
+{% block title %} 仪表盘 {% endblock title %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -418,9 +418,9 @@
     new Chart(ctx1, {
       type: "line",
       data: {
-        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        labels: ["四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
         datasets: [{
-          label: "Mobile apps",
+          label: "鱼尾数",
           tension: 0.4,
           borderWidth: 0,
           pointRadius: 0,
@@ -528,6 +528,7 @@
   right: 15px;
   width: 48px;
   height: 48px;
+  margin-right: -20px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   display: flex;
