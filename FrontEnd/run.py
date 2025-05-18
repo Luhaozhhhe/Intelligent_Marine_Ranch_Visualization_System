@@ -91,16 +91,25 @@ if DEBUG:
 
 if __name__ == "__main__":
     with app.app_context():
-        # 检查是否已存在 admin 用户
+        # 检查管理员用户是否已存在
         adminuser = Users.query.filter_by(email=Config.ADMIN_EMAIL).first()
         
         if not adminuser:
-            # 如果不存在，则创建
-            adminuser = Users(username='admin', email=Config.ADMIN_EMAIL, password=Config.ADMIN_PASS)
+            # 创建管理员用户（仅当用户不存在时）
+            adminuser = Users(
+                username='admin',
+                email=Config.ADMIN_EMAIL,
+                password=Config.ADMIN_PASS
+            )
             db.session.add(adminuser)
-            db.session.commit()
-            print("Admin user created successfully.")
-        else:
-            print("Admin user already exists. Skipping creation.")
             
+            try:
+                db.session.commit()
+                print("管理员用户创建成功")
+            except Exception as e:
+                db.session.rollback()
+                print(f"创建管理员用户失败: {str(e)}")
+        else:
+            print("管理员用户已存在，跳过创建")
+
     app.run()
