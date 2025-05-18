@@ -7,22 +7,122 @@
 {% endblock stylesheets %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Search Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header pb-0">
-                    <h6>数据中心</h6>
+<div class="min-height-300 bg-primary position-absolute w-100"></div>
+
+{% include "includes/sidenav.html" %}
+
+<main class="main-content position-relative border-radius-lg ">
+    {% include "includes/navigation.html" %}
+
+    <div class="container-fluid py-4">
+        <!-- Search Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>数据中心</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8 mx-auto">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="searchInput" placeholder="输入搜索关键词...">
+                                    <button class="btn btn-primary" type="button" id="searchButton">
+                                        <i class="fas fa-search"></i> 搜索
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-8 mx-auto">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="searchInput" placeholder="输入搜索关键词...">
-                                <button class="btn btn-primary" type="button" id="searchButton">
-                                    <i class="fas fa-search"></i> 搜索
-                                </button>
+            </div>
+        </div>
+
+        <!-- Data Analysis Dashboard -->
+        <div class="row">
+            <!-- Fish Size Distribution -->
+            <div class="col-xl-6 mb-4">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>鱼类大小分布</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="fishSizeChart" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Species Distribution -->
+            <div class="col-xl-6 mb-4">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>物种分布统计</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="speciesChart" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Environmental Data -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>环境数据分析</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Temperature Trends -->
+                            <div class="col-md-4">
+                                <div class="card mini-stats-wid">
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-medium">水温趋势</p>
+                                                <h4 class="mb-0">24.5°C</h4>
+                                            </div>
+                                            <div class="mini-stat-icon">
+                                                <i class="fas fa-temperature-high"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Oxygen Levels -->
+                            <div class="col-md-4">
+                                <div class="card mini-stats-wid">
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-medium">溶解氧</p>
+                                                <h4 class="mb-0">7.2 mg/L</h4>
+                                            </div>
+                                            <div class="mini-stat-icon">
+                                                <i class="fas fa-wind"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- pH Levels -->
+                            <div class="col-md-4">
+                                <div class="card mini-stats-wid">
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <div class="flex-grow-1">
+                                                <p class="text-muted fw-medium">pH值</p>
+                                                <h4 class="mb-0">7.8</h4>
+                                            </div>
+                                            <div class="mini-stat-icon">
+                                                <i class="fas fa-flask"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -31,98 +131,7 @@
         </div>
     </div>
 
-    <!-- Data Analysis Dashboard -->
-    <div class="row">
-        <!-- Fish Size Distribution -->
-        <div class="col-xl-6 mb-4">
-            <div class="card">
-                <div class="card-header pb-0">
-                    <h6>鱼类大小分布</h6>
-                </div>
-                <div class="card-body">
-                    <div id="fishSizeChart" style="height: 300px;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Species Distribution -->
-        <div class="col-xl-6 mb-4">
-            <div class="card">
-                <div class="card-header pb-0">
-                    <h6>物种分布统计</h6>
-                </div>
-                <div class="card-body">
-                    <div id="speciesChart" style="height: 300px;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Environmental Data -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header pb-0">
-                    <h6>环境数据分析</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Temperature Trends -->
-                        <div class="col-md-4">
-                            <div class="card mini-stats-wid">
-                                <div class="card-body">
-                                    <div class="d-flex">
-                                        <div class="flex-grow-1">
-                                            <p class="text-muted fw-medium">水温趋势</p>
-                                            <h4 class="mb-0">24.5°C</h4>
-                                        </div>
-                                        <div class="mini-stat-icon">
-                                            <i class="fas fa-temperature-high"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Oxygen Levels -->
-                        <div class="col-md-4">
-                            <div class="card mini-stats-wid">
-                                <div class="card-body">
-                                    <div class="d-flex">
-                                        <div class="flex-grow-1">
-                                            <p class="text-muted fw-medium">溶解氧</p>
-                                            <h4 class="mb-0">7.2 mg/L</h4>
-                                        </div>
-                                        <div class="mini-stat-icon">
-                                            <i class="fas fa-wind"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- pH Levels -->
-                        <div class="col-md-4">
-                            <div class="card mini-stats-wid">
-                                <div class="card-body">
-                                    <div class="d-flex">
-                                        <div class="flex-grow-1">
-                                            <p class="text-muted fw-medium">pH值</p>
-                                            <h4 class="mb-0">7.8</h4>
-                                        </div>
-                                        <div class="mini-stat-icon">
-                                            <i class="fas fa-flask"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+</main>
 {% endblock content %}
 
 {% block javascripts %}
