@@ -8,5 +8,5 @@ from flask import Blueprint
 blueprint = Blueprint(
     'table_blueprint',
     __name__,
-    url_prefix=''
+    url_prefix='/dyn_dt'
 )
