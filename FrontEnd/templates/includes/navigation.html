@@ -9,9 +9,16 @@
           </nav>
           <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
             <div class="ms-md-auto pe-md-3 d-flex align-items-center">
+              <style>
+                .white-placeholder::placeholder {
+                  color: white;
+                }
+              </style>
               <div class="input-group">
-                <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
-                <input type="text" class="form-control" placeholder="Type here...">
+                <span class="input-group-text text-body" style="background-color: rgb(190, 192, 201);">
+                  <i class="fas fa-search" aria-hidden="true"></i>
+                </span>
+                <input type="text" class="form-control white-placeholder" placeholder="    Type here..." style="background-color: rgb(52, 71, 103);">
               </div>
             </div>
             <ul class="navbar-nav  justify-content-end">
