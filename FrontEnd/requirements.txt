@@ -33,3 +33,8 @@ Flask-CDN==1.5.3
 
 # flask_mysqldb
 # psycopg2-binary
+
+# fish.csv
+pandas==2.2.3
+pytz==2025.2
+numpy

@@ -17,24 +17,36 @@
             <div class="row">
                 <div class="col-sm-12">
                     <div class="card">
-                        % 使用 ../Data/Fish.csv 作为数据源 绘制图标
                         <div class="card-header">
-                            <h5>动态数据表</h5>
+                            <h5>动态数据表 - 鱼类数据分布</h5>
                         </div>
-                        
-                        <!-- <div class="card-header">
-                            <h5>Available Routes (defined in config.DYNAMIC_DATATB)</h5>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label for="speciesSelect" class="form-label">选择鱼类</label>
+                                    <select class="form-select" id="speciesSelect">
+                                        <option value="Bream">Bream</option>
+                                        <option value="Perch">Perch</option>
+                                        <option value="Pike">Pike</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label for="parameterSelect" class="form-label">选择参数</label>
+                                    <select class="form-select" id="parameterSelect">
+                                        <option value="Weight(g)">体重 (g)</option>
+                                        <option value="Length1(cm)">长度1 (cm)</option>
+                                        <option value="Length2(cm)">长度2 (cm)</option>
+                                        <option value="Length3(cm)">长度3 (cm)</option>
+                                        <option value="Height(cm)">高度 (cm)</option>
+                                        <option value="Width(cm)">宽度 (cm)</option>
+                                    </select>
+                                </div>
+                                <div class="col d-flex align-items-end">
+                                    <button id="loadDataBtn" class="btn btn-primary w-100">加载数据</button>
+                                </div>
+                            </div>
+                            <canvas id="fishChart"></canvas>
                         </div>
-                        <div class="card-block px-4">
-                            <ul class="pc-submenu mt-3">
-                                {% for link in routes %}
-                                    <li class="pc-item">
-                                        <a class="pc-link" href="{{ url_for('table_blueprint.model_dt', aPath=link) }}">{{ link }}</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            
-                        </div> -->
                     </div>
                 </div>
             </div>
@@ -44,4 +56,103 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.getElementById("loadDataBtn").addEventListener("click", function() {
+        const species = document.getElementById("speciesSelect").value;
+        const parameter = document.getElementById("parameterSelect").value;
+
+        // 发起 API 请求，获取数据
+        fetch(`/api/fish_data?species=${species}&parameter=${parameter}`)
+            .then(response => response.json())
+            .then(data => {
+                // 如果已经有图表，先销毁它
+                if (window.fishChart instanceof Chart) {
+                    window.fishChart.destroy();
+                }
+                console.log(data); // 打印数据以供调试
+
+                // 获取 canvas 的上下文
+                const ctx = document.getElementById('fishChart').getContext('2d');
+
+                // 构建新的图表
+                window.fishChart = new Chart(ctx, {
+                    type: 'bar', // 使用柱状图
+                    data: {
+                        labels: data.labels, // 区间作为 x 轴标签
+                        datasets: [{
+                            label: `${species} - ${parameter}`, // 标题
+                            data: data.values, // 对应区间的数量
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: { 
+                                title: { 
+                                    display: true, 
+                                    text: parameter 
+                                }
+                            },
+                            y: { 
+                                title: { 
+                                    display: true, 
+                                    text: '数量' 
+                                },
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching data: ", error);
+            });
+    });
+</script>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.getElementById("loadDataBtn").addEventListener("click", function() {
+            const species = document.getElementById("speciesSelect").value;
+            const parameter = document.getElementById("parameterSelect").value;
+
+            fetch(`/api/fish_data?species=${species}&parameter=${parameter}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.fishChart) {
+                        window.fishChart.destroy();
+                    }
+                    const ctx = document.getElementById('fishChart').getContext('2d');
+                    window.fishChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: `${species} - ${parameter}`,
+                                data: data.values,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                x: { title: { display: true, text: parameter } },
+                                y: { title: { display: true, text: '数量' } }
+                            }
+                        }
+                    });
+                });
+        });
+    </script> -->
+{% endblock javascripts %}
