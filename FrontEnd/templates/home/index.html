@@ -18,106 +18,108 @@
     <div class="container-fluid py-4">
 
       <div class="row">
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-          <div class="card">
-            <div class="card-body p-3">
+        <div class="col-lg-6 mb-4">
+          <div class="card bg-gradient-dark text-white">
+            <div class="card-header bg-transparent">
+              <h6 class="text-white mb-0">水文气象</h6>
+            </div>
+            <div class="card-body">
               <div class="row">
-                <div class="col-8">
-                  <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">今日水氧量</p>
-                    <h5 class="font-weight-bolder">
-                      80%
-                    </h5>
-                    <p class="mb-0">
-                      <span class="text-success text-sm font-weight-bolder">+15%</span>
-                      较昨日
-                    </p>
+                <!-- 第一行 -->
+                <div class="col-md-4 mb-4">
+                  <div class="stats-card">
+                    <div class="stats-card-body">
+                      <p class="stats-title mb-1">电池电压</p>
+                      <h4 class="stats-value mb-2">25.90 V</h4>
+                      <div class="stats-change">
+                        <span class="text-success">+15% 较昨日</span>
+                      </div>
+                      <div class="stats-icon">
+                        <i class="ni ni-battery-charging"></i>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="col-4 text-end">
-                  <div class="icon icon-shape bg-gradient-primary shadow-primary text-center rounded-circle">
-                    <i class="ni ni-money-coins text-lg opacity-10" aria-hidden="true"></i>
+                
+                <div class="col-md-4 mb-4">
+                  <div class="stats-card">
+                    <div class="stats-card-body">
+                      <p class="stats-title mb-1">盐度</p>
+                      <h4 class="stats-value mb-2">34.16 %</h4>
+                      <div class="stats-change">
+                        <span class="text-success">+3% 较昨日</span>
+                      </div>
+                      <div class="stats-icon">
+                        <i class="ni ni-sound-wave"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                  <div class="stats-card">
+                    <div class="stats-card-body">
+                      <p class="stats-title mb-1">溶解氧</p>
+                      <h4 class="stats-value mb-2">0.00 mg/L</h4>
+                      <div class="stats-change">
+                        <span class="text-danger">-2% 较昨日</span>
+                      </div>
+                      <div class="stats-icon">
+                        <i class="ni ni-air-baloon"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 第二行 -->
+                <div class="col-md-4">
+                  <div class="stats-card">
+                    <div class="stats-card-body">
+                      <p class="stats-title mb-1">浊度</p>
+                      <h4 class="stats-value mb-2">2.05 NTU</h4>
+                      <div class="stats-change">
+                        <span class="text-success">+5% 较昨日</span>
+                      </div>
+                      <div class="stats-icon">
+                        <i class="ni ni-world"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="stats-card">
+                    <div class="stats-card-body">
+                      <p class="stats-title mb-1">pH</p>
+                      <h4 class="stats-value mb-2">8.37</h4>
+                      <div class="stats-change">
+                        <span class="text-warning">0% 较昨日</span>
+                      </div>
+                      <div class="stats-icon">
+                        <i class="ni ni-atom"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="stats-card">
+                    <div class="stats-card-body">
+                      <p class="stats-title mb-1">水温</p>
+                      <h4 class="stats-value mb-2">15 °C</h4>
+                      <div class="stats-change">
+                        <span class="text-success">+4% 较昨日</span>
+                      </div>
+                      <div class="stats-icon">
+                        <i class="ni ni-thermometer-98"></i>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-          <div class="card">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="col-8">
-                  <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">今日鱼尾数</p>
-                    <h5 class="font-weight-bolder">
-                      336,000尾
-                    </h5>
-                    <p class="mb-0">
-                      <span class="text-success text-sm font-weight-bolder">+3%</span>
-                      较昨日
-                    </p>
-                  </div>
-                </div>
-                <div class="col-4 text-end">
-                  <div class="icon icon-shape bg-gradient-danger shadow-danger text-center rounded-circle">
-                    <i class="ni ni-world text-lg opacity-10" aria-hidden="true"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-          <div class="card">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="col-8">
-                  <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">今日平均气温</p>
-                    <h5 class="font-weight-bolder">
-                      24°C
-                    </h5>
-                    <p class="mb-0">
-                      <span class="text-danger text-sm font-weight-bolder">-2%</span>
-                      较昨日
-                    </p>
-                  </div>
-                </div>
-                <div class="col-4 text-end">
-                  <div class="icon icon-shape bg-gradient-success shadow-success text-center rounded-circle">
-                    <i class="ni ni-paper-diploma text-lg opacity-10" aria-hidden="true"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-3 col-sm-6">
-          <div class="card">
-            <div class="card-body p-3">
-              <div class="row">
-                <div class="col-8">
-                  <div class="numbers">
-                    <p class="text-sm mb-0 text-uppercase font-weight-bold">今日水质</p>
-                    <h5 class="font-weight-bolder">
-                      80分
-                    </h5>
-                    <p class="mb-0">
-                      <span class="text-success text-sm font-weight-bolder">+5%</span> 较昨日
-                    </p>
-                  </div>
-                </div>
-                <div class="col-4 text-end">
-                  <div class="icon icon-shape bg-gradient-warning shadow-warning text-center rounded-circle">
-                    <i class="ni ni-cart text-lg opacity-10" aria-hidden="true"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div class="row mt-4">
         <div class="col-lg-7 mb-lg-0 mb-4">
@@ -489,4 +491,67 @@
     });
   </script>
 
+<style>
+.stats-card {
+  background: rgba(13, 19, 53, 0.95);
+  border-radius: 15px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.stats-card-body {
+  position: relative;
+  z-index: 1;
+}
+
+.stats-title {
+  color: #8898aa;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.stats-value {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.stats-change {
+  font-size: 0.875rem;
+}
+
+.stats-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-icon i {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.text-success {
+  color: #2dce89 !important;
+}
+
+.text-danger {
+  color: #f5365c !important;
+}
+
+.text-warning {
+  color: #fb6340 !important;
+}
+</style>
+
 {% endblock javascripts %}
+
