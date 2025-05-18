@@ -57,9 +57,16 @@ if DEBUG:
 
 if __name__ == "__main__":
     with app.app_context():
-        # Create Admin User
-        adminuser = Users(username='admin', email=Config.ADMIN_EMAIL, password=Config.ADMIN_PASS)
-        db.session.add(adminuser)
-        db.session.commit()
-
+        # 检查是否已存在 admin 用户
+        adminuser = Users.query.filter_by(email=Config.ADMIN_EMAIL).first()
+        
+        if not adminuser:
+            # 如果不存在，则创建
+            adminuser = Users(username='admin', email=Config.ADMIN_EMAIL, password=Config.ADMIN_PASS)
+            db.session.add(adminuser)
+            db.session.commit()
+            print("Admin user created successfully.")
+        else:
+            print("Admin user already exists. Skipping creation.")
+            
     app.run()
