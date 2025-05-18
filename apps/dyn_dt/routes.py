@@ -4,7 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 import json, csv, io
-from flask_login import login_required
+from flask_login import login_required, current_user
 from apps.dyn_dt import blueprint
 from flask import render_template, request, redirect, url_for, jsonify, make_response
 from apps.dyn_dt.utils import get_model_field_names, get_model_fk_values, name_to_class, user_filter, exclude_auto_gen_fields
@@ -20,7 +20,7 @@ def dynamic_dt():
         'routes': config.Config.DYNAMIC_DATATB.keys(),
         'segment': 'dynamic_dt'
     }
-    return render_template('dyn_dt/index.html', **context)
+    return render_template('dyn_dt/index.html', **context, username=current_user.username)
 
 @blueprint.route('/create_filter/<model_name>', methods=["POST"])
 def create_filter(model_name):
@@ -175,7 +175,7 @@ def model_dt(aPath):
         'choices_dict': choices_dict,
         'exclude_auto_gen_fields': exclude_auto_gen_fields(aModelClass)
     }
-    return render_template('dyn_dt/model.html', **context)
+    return render_template('dyn_dt/model.html', **context, username=current_user.username)
 
 
 @blueprint.route('/create/<aPath>', methods=["POST"])
