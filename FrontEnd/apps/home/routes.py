@@ -13,7 +13,7 @@ from jinja2 import TemplateNotFound
 @login_required
 def index():
 
-    return render_template('home/index.html', segment='index')
+    return render_template('home/index.html', segment='index', username=current_user.username)
 
 
 @blueprint.route('/tables')
@@ -33,7 +33,7 @@ def admin_template():
         
 
         # Serve the file (if exists) from app/templates/home/admin.html
-        return render_template("home/" + template, segment=segment)
+        return render_template("home/" + template, segment=segment, username=current_user.username)
 
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404
@@ -55,7 +55,7 @@ def route_template(template):
         segment = get_segment(request)
 
         # Serve the file (if exists) from app/templates/home/FILE.html
-        return render_template("home/" + template, segment=segment)
+        return render_template("home/" + template, segment=segment, username=current_user.username)
 
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404

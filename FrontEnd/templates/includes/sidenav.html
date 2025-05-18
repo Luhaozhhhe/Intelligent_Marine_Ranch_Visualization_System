@@ -47,6 +47,7 @@
         </a>
       </li>
 
+      {% if username == 'admin' %}
       <li class="nav-item">
         <a class="nav-link {% if 'tables' in segment %} active {% endif %}" href="/tables.html">
           <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -55,6 +56,7 @@
           <span class="nav-link-text ms-1">管理员管理界面</span>
         </a>
       </li>
+      {% endif %}
 
 
       <li class="nav-item">
