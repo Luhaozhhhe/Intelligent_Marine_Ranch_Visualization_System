@@ -18,17 +18,38 @@
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header">
-                            <h5>Available Routes (defined in config.DYNAMIC_DATATB)</h5>
+                            <h5>动态数据表 - 鱼类数据分布</h5>
                         </div>
-                        <div class="card-block px-4">
-                            <ul class="pc-submenu mt-3">
-                                {% for link in routes %}
-                                    <li class="pc-item">
-                                        <a class="pc-link" href="{{ url_for('table_blueprint.model_dt', aPath=link) }}">{{ link }}</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label for="speciesSelect" class="form-label">选择鱼类</label>
+                                    <select class="form-select" id="speciesSelect">
+                                        <option value="Bream">欧鲷 (Bream)</option>
+                                        <option value="Roach">拟鲤 (Roach)</option>
+                                        <option value="Whitefish">白鲑 (Whitefish)</option>
+                                        <option value="Parkki">帕尔基鱼 (Parkki)</option>
+                                        <option value="Perch">鲈鱼 (Perch)</option>
+                                        <option value="Pike">梭子鱼 (Pike)</option>
+                                        <option value="Smelt">胡瓜鱼 (Smelt)</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <label for="parameterSelect" class="form-label">选择参数</label>
+                                    <select class="form-select" id="parameterSelect">
+                                        <option value="Weight(g)">体重 (g)</option>
+                                        <option value="Length1(cm)">标准体长 (cm)</option>
+                                        <option value="Length2(cm)">叉长 (cm)</option>
+                                        <option value="Length3(cm)">总长 (cm)</option>
+                                        <option value="Height(cm)">体高 (cm)</option>
+                                        <option value="Width(cm)">体宽 (cm)</option>
+                                    </select>
+                                </div>
+                                <div class="col d-flex align-items-end">
+                                    <button id="loadDataBtn" class="btn btn-primary w-100" style="margin-top: 30px;">加载数据</button>
+                                </div>
+                            </div>
+                            <canvas id="fishChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -39,4 +60,96 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // 参数映射表
+    const parameterMapping = {
+        "Weight(g)": "体重 (g)",
+        "Length1(cm)": "标准体长 (cm)",
+        "Length2(cm)": "叉长 (cm)",
+        "Length3(cm)": "总长 (cm)",
+        "Height(cm)": "体高 (cm)",
+        "Width(cm)": "体宽 (cm)"
+    };
+
+    // 鱼类映射表
+    const speciesMapping = {
+        "Bream": "欧鲷 (Bream)",
+        "Roach": "拟鲤 (Roach)",
+        "Whitefish": "白鲑 (Whitefish)",
+        "Parkki": "帕尔基鱼 (Parkki)",
+        "Perch": "鲈鱼 (Perch)",
+        "Pike": "梭子鱼 (Pike)",
+        "Smelt": "胡瓜鱼 (Smelt)"
+    };
+
+    // 加载数据的方法
+    function loadData() {
+        const species = document.getElementById("speciesSelect").value;
+        const parameter = document.getElementById("parameterSelect").value;
+
+        fetch(`/api/fish_data?species=${species}&parameter=${parameter}`)
+            .then(response => response.json())
+            .then(data => {
+                if (window.fishChart instanceof Chart) {
+                    window.fishChart.destroy();
+                }
+                const ctx = document.getElementById('fishChart').getContext('2d');
+
+                window.fishChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: `${speciesMapping[species]} - ${parameterMapping[parameter]}`,
+                            data: data.values,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: { 
+                                title: { 
+                                    display: true, 
+                                    text: parameterMapping[parameter]
+                                }
+                            },
+                            y: { 
+                                title: { 
+                                    display: true, 
+                                    text: '数量'
+                                },
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching data: ", error);
+            });
+    }
+
+    // 页面加载完毕后，自动触发默认展示
+    window.onload = function() {
+        document.getElementById("speciesSelect").value = "Bream";
+        document.getElementById("parameterSelect").value = "Weight(g)";
+        loadData();
+    };
+
+    // 绑定按钮点击事件
+    document.getElementById("loadDataBtn").addEventListener("click", loadData);
+</script>
+
+
+{% endblock javascripts %}

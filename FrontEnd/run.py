@@ -3,6 +3,12 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+# fish.csv
+import pandas as pd
+import numpy as np
+from flask import jsonify, request
+# fish.csv
+
 import os
 from   flask_migrate import Migrate
 from   flask_minify  import Minify
@@ -27,6 +33,34 @@ except KeyError:
     exit('Error: Invalid <config_mode>. Expected values [Debug, Production] ')
 
 app = create_app(app_config)
+
+# fish.csv
+# CSV 文件路径
+FISH_CSV_PATH = 'D:/Nice/Documents/GitHub/Intelligent_Marine_Ranch_Visualization_System/Data/Fish.csv'
+
+# 读取数据
+fish_data = pd.read_csv(FISH_CSV_PATH)
+
+@app.route('/api/fish_data', methods=['GET'])
+def get_fish_data():
+    species = request.args.get('species')
+    parameter = request.args.get('parameter')
+
+    # 过滤数据
+    filtered_data = fish_data[fish_data['Species'] == species][parameter]
+
+    # 计算区间
+    min_val, max_val = filtered_data.min(), filtered_data.max()
+    bins = np.linspace(min_val, max_val, 10)
+    labels = [f'{round(bins[i], 2)} - {round(bins[i + 1], 2)}' for i in range(len(bins) - 1)]
+    hist, _ = np.histogram(filtered_data, bins=bins)
+
+    response_data = {
+        "labels": labels,
+        "values": hist.tolist()
+    }
+    return jsonify(response_data)
+# fish.csv
 
 # Create tables & Fallback to SQLite
 with app.app_context():
