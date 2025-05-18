@@ -8,12 +8,14 @@ import json
 import requests
 import time
 from flask import render_template, request, jsonify, Response, stream_with_context
+from flask_login import login_required, current_user
 from apps.it_center import blueprint
 
 # AI聊天处理函数
 @blueprint.route('/index', methods=['GET'])
+@login_required
 def index():
-    return render_template('it_center/index.html')
+    return render_template('it_center/index.html',username=current_user.username)
 
 @blueprint.route('/api/chat', methods=['POST'])
 def chat():

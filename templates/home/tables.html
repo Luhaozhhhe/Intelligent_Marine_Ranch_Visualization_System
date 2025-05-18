@@ -1,449 +1,360 @@
 {% extends 'layouts/base.html' %}
 
-{% block title %} Tables {% endblock title %}
+{% block title %} 系统管理 {% endblock title %}
 
-<!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+<style>
+.action-buttons .btn {
+  margin-right: 5px;
+}
+.filter-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #fff;
+  border-radius: 8px;
+}
+</style>
+{% endblock stylesheets %}
 
 {% block content %}
+<div class="min-height-300 bg-primary position-absolute w-100"></div>
+{% include "includes/sidenav.html" %}
 
-  <div class="min-height-300 bg-primary position-absolute w-100"></div>
-      
-  {% include "includes/sidenav.html" %}
+<main class="main-content position-relative border-radius-lg">
+  {% include "includes/navigation.html" %}
 
-  <main class="main-content position-relative border-radius-lg ">
-
-    {% include "includes/navigation.html" %}
-
-    <div class="container-fluid py-4">
-
-      <div class="row">
-        <div class="col-12">
-          <div class="card mb-4">
-            <div class="card-header pb-0">
-              <h6>Authors table</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Author</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Function</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Employed</th>
-                      <th class="text-secondary opacity-7"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/team-2.jpg') }}" class="avatar avatar-sm me-3" alt="user1">
-                          </div>
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">John Michael</h6>
-                            <p class="text-xs text-secondary mb-0">john@creative-tim.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-xs font-weight-bold mb-0">Manager</p>
-                        <p class="text-xs text-secondary mb-0">Organization</p>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="badge badge-sm bg-gradient-success">Online</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">23/04/18</span>
-                      </td>
-                      <td class="align-middle">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                          Edit
-                        </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/team-3.jpg') }}" class="avatar avatar-sm me-3" alt="user2">
-                          </div>
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Alexa Liras</h6>
-                            <p class="text-xs text-secondary mb-0">alexa@creative-tim.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-xs font-weight-bold mb-0">Programator</p>
-                        <p class="text-xs text-secondary mb-0">Developer</p>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="badge badge-sm bg-gradient-secondary">Offline</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">11/01/19</span>
-                      </td>
-                      <td class="align-middle">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                          Edit
-                        </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/team-4.jpg') }}" class="avatar avatar-sm me-3" alt="user3">
-                          </div>
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Laurent Perrier</h6>
-                            <p class="text-xs text-secondary mb-0">laurent@creative-tim.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-xs font-weight-bold mb-0">Executive</p>
-                        <p class="text-xs text-secondary mb-0">Projects</p>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="badge badge-sm bg-gradient-success">Online</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">19/09/17</span>
-                      </td>
-                      <td class="align-middle">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                          Edit
-                        </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/team-3.jpg') }}" class="avatar avatar-sm me-3" alt="user4">
-                          </div>
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Michael Levi</h6>
-                            <p class="text-xs text-secondary mb-0">michael@creative-tim.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-xs font-weight-bold mb-0">Programator</p>
-                        <p class="text-xs text-secondary mb-0">Developer</p>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="badge badge-sm bg-gradient-success">Online</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">24/12/08</span>
-                      </td>
-                      <td class="align-middle">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                          Edit
-                        </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/team-2.jpg') }}" class="avatar avatar-sm me-3" alt="user5">
-                          </div>
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Richard Gran</h6>
-                            <p class="text-xs text-secondary mb-0">richard@creative-tim.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-xs font-weight-bold mb-0">Manager</p>
-                        <p class="text-xs text-secondary mb-0">Executive</p>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="badge badge-sm bg-gradient-secondary">Offline</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">04/10/21</span>
-                      </td>
-                      <td class="align-middle">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                          Edit
-                        </a>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/team-4.jpg') }}" class="avatar avatar-sm me-3" alt="user6">
-                          </div>
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Miriam Eric</h6>
-                            <p class="text-xs text-secondary mb-0">miriam@creative-tim.com</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-xs font-weight-bold mb-0">Programtor</p>
-                        <p class="text-xs text-secondary mb-0">Developer</p>
-                      </td>
-                      <td class="align-middle text-center text-sm">
-                        <span class="badge badge-sm bg-gradient-secondary">Offline</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <span class="text-secondary text-xs font-weight-bold">14/09/20</span>
-                      </td>
-                      <td class="align-middle">
-                        <a href="javascript:;" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit user">
-                          Edit
-                        </a>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+  <div class="container-fluid py-4">
+    <!-- 系统用户管理 -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card mb-4">
+          <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+            <h6>系统用户管理</h6>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+              <i class="fas fa-plus"></i> 添加用户
+            </button>
+          </div>
+          <div class="card-body px-0 pt-0 pb-2">
+            <div class="filter-section mx-4">
+              <div class="row">
+                <div class="col-md-3">
+                  <input type="text" class="form-control" placeholder="搜索用户名/邮箱">
+                </div>
+                <div class="col-md-3">
+                  <select class="form-control">
+                    <option value="">所有角色</option>
+                    <option value="admin">管理员</option>
+                    <option value="user">普通用户</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <button class="btn btn-primary w-100">搜索</button>
+                </div>
               </div>
+            </div>
+            <div class="table-responsive p-0">
+              <table class="table align-items-center mb-0">
+                <thead>
+                  <tr>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">用户信息</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">角色</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">状态</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">注册时间</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for user in users %}
+                  <tr>
+                    <td>
+                      <div class="d-flex px-2 py-1">
+                        <div>
+                          <img src="{{ user.avatar_url }}" class="avatar avatar-sm me-3">
+                        </div>
+                        <div class="d-flex flex-column justify-content-center">
+                          <h6 class="mb-0 text-sm">{{ user.username }}</h6>
+                          <p class="text-xs text-secondary mb-0">{{ user.email }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <p class="text-xs font-weight-bold mb-0">{{ user.role }}</p>
+                    </td>
+                    <td class="align-middle text-center text-sm">
+                      <span class="badge badge-sm bg-gradient-{{ 'success' if user.is_active else 'secondary' }}">
+                        {{ '启用' if user.is_active else '禁用' }}
+                      </span>
+                    </td>
+                    <td class="align-middle text-center">
+                      <span class="text-secondary text-xs font-weight-bold">{{ user.created_at }}</span>
+                    </td>
+                    <td class="align-middle text-center">
+                      <div class="action-buttons">
+                        <button class="btn btn-info btn-sm" onclick="editUser({{ user.id }})">编辑</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser({{ user.id }})">删除</button>
+                        <button class="btn btn-warning btn-sm" onclick="toggleUserStatus({{ user.id }})">
+                          {{ '禁用' if user.is_active else '启用' }}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
-
-      <div class="row">
-        <div class="col-12">
-          <div class="card mb-4">
-            <div class="card-header pb-0">
-              <h6>Projects table</h6>
-            </div>
-            <div class="card-body px-0 pt-0 pb-2">
-              <div class="table-responsive p-0">
-                <table class="table align-items-center justify-content-center mb-0">
-                  <thead>
-                    <tr>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Project</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Budget</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
-                      <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center opacity-7 ps-2">Completion</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/small-logos/logo-spotify.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="spotify">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Spotify</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$2,500</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">working</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">60%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-info" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/small-logos/logo-invision.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="invision">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Invision</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$5,000</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">done</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">100%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/small-logos/logo-jira.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="jira">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Jira</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$3,400</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">canceled</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">30%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-danger" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="30" style="width: 30%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/small-logos/logo-slack.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="slack">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Slack</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$1,000</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">canceled</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">0%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-success" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="0" style="width: 0%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/small-logos/logo-webdev.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="webdev">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Webdev</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$14,000</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">working</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">80%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-info" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="80" style="width: 80%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex px-2">
-                          <div>
-                            <img src="{{ url_for('static', filename='assets/img/small-logos/logo-xd.svg') }}" class="avatar avatar-sm rounded-circle me-2" alt="xd">
-                          </div>
-                          <div class="my-auto">
-                            <h6 class="mb-0 text-sm">Adobe XD</h6>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="text-sm font-weight-bold mb-0">$2,300</p>
-                      </td>
-                      <td>
-                        <span class="text-xs font-weight-bold">done</span>
-                      </td>
-                      <td class="align-middle text-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                          <span class="me-2 text-xs font-weight-bold">100%</span>
-                          <div>
-                            <div class="progress">
-                              <div class="progress-bar bg-gradient-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="align-middle">
-                        <button class="btn btn-link text-secondary mb-0" aria-haspopup="true" aria-expanded="false">
-                          <i class="fa fa-ellipsis-v text-xs"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {% include "includes/footer.html" %}
-
     </div>
 
-  </main>
+    <!-- 渔场数据管理 -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card mb-4">
+          <div class="card-header pb-0">
+            <h6>渔场数据管理</h6>
+          </div>
+          <div class="card-body px-0 pt-0 pb-2">
+            <div class="filter-section mx-4">
+              <div class="row">
+                <div class="col-md-3">
+                  <input type="date" class="form-control" placeholder="选择日期">
+                </div>
+                <div class="col-md-3">
+                  <select class="form-control">
+                    <option value="">数据类型</option>
+                    <option value="water">水质数据</option>
+                    <option value="fish">鱼类数据</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <div class="btn-group" role="group">
+                    <button class="btn btn-warning" onclick="detectAnomalies()">异常检测</button>
+                    <button class="btn btn-info" onclick="analyzeData()">数据分析</button>
+                    <button class="btn btn-success" onclick="cleanData()">数据清洗</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive p-0">
+              <!-- 渔场数据表格 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <!-- 操作日志 -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card mb-4">
+          <div class="card-header pb-0">
+            <h6>操作日志</h6>
+          </div>
+          <div class="card-body px-0 pt-0 pb-2">
+            <div class="filter-section mx-4">
+              <div class="row">
+                <div class="col-md-3">
+                  <input type="date" class="form-control" placeholder="开始日期">
+                </div>
+                <div class="col-md-3">
+                  <input type="date" class="form-control" placeholder="结束日期">
+                </div>
+                <div class="col-md-3">
+                  <select class="form-control">
+                    <option value="">操作类型</option>
+                    <option value="login">登录</option>
+                    <option value="data">数据操作</option>
+                    <option value="user">用户管理</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <button class="btn btn-primary w-100">搜索</button>
+                </div>
+              </div>
+            </div>
+            <div class="table-responsive p-0">
+              <table class="table align-items-center mb-0">
+                <thead>
+                  <tr>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">操作时间</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">操作用户</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">操作类型</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">操作详情</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">IP地址</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for log in logs %}
+                  <tr>
+                    <td>{{ log.created_at }}</td>
+                    <td>{{ log.username }}</td>
+                    <td>{{ log.action_type }}</td>
+                    <td>{{ log.action_detail }}</td>
+                    <td>{{ log.ip_address }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include "includes/footer.html" %}
+  </div>
+</main>
+
+<!-- 添加用户模态框 -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">添加用户</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addUserForm">
+          <div class="mb-3">
+            <label class="form-label">用户名</label>
+            <input type="text" class="form-control" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">邮箱</label>
+            <input type="email" class="form-control" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">密码</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">角色</label>
+            <select class="form-control" name="role" required>
+              <option value="user">普通用户</option>
+              <option value="admin">管理员</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" onclick="submitAddUser()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock content %}
 
-<!-- Specific JS goes HERE --> 
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+<script>
+// 用户管理相关函数
+function editUser(userId) {
+    // 打开编辑模态框
+    const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+    
+    // 获取用户数据
+    fetch(`/api/users/${userId}`)
+        .then(response => response.json())
+        .then(user => {
+            // 填充表单数据
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editUsername').value = user.username;
+            document.getElementById('editEmail').value = user.email;
+            document.getElementById('editRole').value = user.role;
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('获取用户信息失败', 'danger');
+        });
+}
+
+function deleteUser(userId) {
+    if (confirm('确定要删除这个用户吗？此操作不可恢复！')) {
+        fetch(`/api/users/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // 删除成功，刷新页面
+                location.reload();
+                showNotification('用户已成功删除', 'success');
+            } else {
+                throw new Error('删除失败');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('删除用户失败', 'danger');
+        });
+    }
+}
+
+function toggleUserStatus(userId) {
+    fetch(`/api/users/${userId}/toggle-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+            showNotification(`用户状态已更新为${data.status}`, 'success');
+        } else {
+            throw new Error('更新状态失败');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('更新用户状态失败', 'danger');
+    });
+}
+
+// 显示通知的辅助函数
+function showNotification(message, type) {
+    const alertHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    document.getElementById('alerts-container').innerHTML = alertHTML;
+}
+
+// 提交编辑用户表单
+function submitEditUser() {
+    const form = document.getElementById('editUserForm');
+    const formData = new FormData(form);
+    const userId = document.getElementById('editUserId').value;
+
+    fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(Object.fromEntries(formData))
+    })
+    .then(response => {
+        if (response.ok) {
+            location.reload();
+            showNotification('用户信息已更新', 'success');
+        } else {
+            throw new Error('更新失败');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('更新用户信息失败', 'danger');
+    });
+}
+</script>
+{% endblock javascripts %}
