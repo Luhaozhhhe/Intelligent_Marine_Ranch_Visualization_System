@@ -1,0 +1,194 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} 数据分析中心 {% endblock %}
+
+{% block stylesheets %}
+<link href="{{ url_for('static', filename='assets/css/data-analysis.css') }}" rel="stylesheet" />
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Search Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>数据中心</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8 mx-auto">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="searchInput" placeholder="输入搜索关键词...">
+                                <button class="btn btn-primary" type="button" id="searchButton">
+                                    <i class="fas fa-search"></i> 搜索
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Analysis Dashboard -->
+    <div class="row">
+        <!-- Fish Size Distribution -->
+        <div class="col-xl-6 mb-4">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>鱼类大小分布</h6>
+                </div>
+                <div class="card-body">
+                    <div id="fishSizeChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Species Distribution -->
+        <div class="col-xl-6 mb-4">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>物种分布统计</h6>
+                </div>
+                <div class="card-body">
+                    <div id="speciesChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Environmental Data -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <h6>环境数据分析</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Temperature Trends -->
+                        <div class="col-md-4">
+                            <div class="card mini-stats-wid">
+                                <div class="card-body">
+                                    <div class="d-flex">
+                                        <div class="flex-grow-1">
+                                            <p class="text-muted fw-medium">水温趋势</p>
+                                            <h4 class="mb-0">24.5°C</h4>
+                                        </div>
+                                        <div class="mini-stat-icon">
+                                            <i class="fas fa-temperature-high"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Oxygen Levels -->
+                        <div class="col-md-4">
+                            <div class="card mini-stats-wid">
+                                <div class="card-body">
+                                    <div class="d-flex">
+                                        <div class="flex-grow-1">
+                                            <p class="text-muted fw-medium">溶解氧</p>
+                                            <h4 class="mb-0">7.2 mg/L</h4>
+                                        </div>
+                                        <div class="mini-stat-icon">
+                                            <i class="fas fa-wind"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- pH Levels -->
+                        <div class="col-md-4">
+                            <div class="card mini-stats-wid">
+                                <div class="card-body">
+                                    <div class="d-flex">
+                                        <div class="flex-grow-1">
+                                            <p class="text-muted fw-medium">pH值</p>
+                                            <h4 class="mb-0">7.8</h4>
+                                        </div>
+                                        <div class="mini-stat-icon">
+                                            <i class="fas fa-flask"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+// Fish Size Distribution Chart
+var fishSizeOptions = {
+    series: [{
+        name: '数量',
+        data: [30, 40, 45, 50, 49, 60, 70, 91]
+    }],
+    chart: {
+        type: 'bar',
+        height: 300
+    },
+    plotOptions: {
+        bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            endingShape: 'rounded'
+        },
+    },
+    dataLabels: {
+        enabled: false
+    },
+    xaxis: {
+        categories: ['0-3cm', '3-6cm', '6-9cm', '9-12cm', '12-15cm', '15-18cm', '18-21cm', '21cm+'],
+    },
+    title: {
+        text: '鱼类大小分布图',
+        align: 'center'
+    }
+};
+
+var fishSizeChart = new ApexCharts(document.querySelector("#fishSizeChart"), fishSizeOptions);
+fishSizeChart.render();
+
+// Species Distribution Chart
+var speciesOptions = {
+    series: [44, 55, 13, 43, 22],
+    chart: {
+        type: 'pie',
+        height: 300
+    },
+    labels: ['鲫鱼', '鲤鱼', '草鱼', '鲢鱼', '其他'],
+    responsive: [{
+        breakpoint: 480,
+        options: {
+            chart: {
+                width: 200
+            },
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }]
+};
+
+var speciesChart = new ApexCharts(document.querySelector("#speciesChart"), speciesOptions);
+speciesChart.render();
+
+// Search Functionality
+document.getElementById('searchButton').addEventListener('click', function() {
+    var searchValue = document.getElementById('searchInput').value;
+    // Implement search logic here
+    console.log('Searching for:', searchValue);
+});
+</script>
+{% endblock javascripts %}
