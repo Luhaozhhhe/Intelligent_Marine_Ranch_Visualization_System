@@ -6,7 +6,7 @@ Copyright (c) 2019 - present AppSeed.us
 from flask import Blueprint
 
 blueprint = Blueprint(
-    'charts_blueprint',
+    'it_center_blueprint',
     __name__,
-    url_prefix=''
+    url_prefix='/it_center'
 )
