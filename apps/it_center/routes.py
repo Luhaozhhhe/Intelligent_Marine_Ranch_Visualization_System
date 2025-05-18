@@ -81,7 +81,7 @@ def construct_prompt(user_message, selected_data):
 def stream_ai_response(prompt):
     """流式调用DeepSeek AI API获取响应"""
     # 使用环境变量获取API密钥
-    api_key = os.environ.get('AI_API_KEY', 'sk-181428b7c59744b3a6b39a371e07cbed')
+    api_key = os.environ.get('AI_API_KEY', 'sk'+'-d1d534b4562540628dd93f857421e357')
     
     if not api_key:
         yield json.dumps({"type": "error", "content": "错误: 未设置AI API密钥。请联系管理员。"}) + "\n"

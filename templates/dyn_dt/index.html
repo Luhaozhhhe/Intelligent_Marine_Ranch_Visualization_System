@@ -116,7 +116,7 @@
               <div class="col-8">
                 <div class="numbers">
                   <p class="text-sm mb-0 text-uppercase font-weight-bold">监测站点数量</p>
-                  <h5 class="font-weight-bolder card-stat" id="stations-count">--</h5>
+                  <h5 class="font-weight-bolder card-stat" id="stations-count">127</h5>
                   <p class="mb-0 text-sm">
                     <span class="text-success text-sm font-weight-bolder">+5%</span>
                     较上月新增
@@ -139,7 +139,7 @@
               <div class="col-8">
                 <div class="numbers">
                   <p class="text-sm mb-0 text-uppercase font-weight-bold">水质正常站点比例</p>
-                  <h5 class="font-weight-bolder card-stat" id="normal-stations">--</h5>
+                  <h5 class="font-weight-bolder card-stat" id="normal-stations">85%</h5>
                   <p class="mb-0 text-sm">
                     <span class="text-success text-sm font-weight-bolder">+3%</span>
                     较上月提升
@@ -162,7 +162,7 @@
               <div class="col-8">
                 <div class="numbers">
                   <p class="text-sm mb-0 text-uppercase font-weight-bold">鱼类数据样本数</p>
-                  <h5 class="font-weight-bolder card-stat" id="fish-samples">--</h5>
+                  <h5 class="font-weight-bolder card-stat" id="fish-samples">159</h5>
                   <p class="mb-0 text-sm">
                     <span class="text-success text-sm font-weight-bolder">+12%</span>
                     较去年同期增长
@@ -367,21 +367,21 @@
               <div class="progress-wrapper">
                 <div class="progress-info">
                   <div class="progress-percentage">
-                    <span id="normal-status-percent">-%</span>
+                    <span id="normal-status-percent">正常: 85%</span>
                   </div>
                 </div>
                 <div class="progress">
-                  <div class="progress-bar bg-success" id="normal-status-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+                  <div class="progress-bar bg-success" id="normal-status-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="width: 85%;"></div>
                 </div>
               </div>
               <div class="progress-wrapper">
                 <div class="progress-info">
                   <div class="progress-percentage">
-                    <span id="maintenance-status-percent">-%</span>
+                    <span id="maintenance-status-percent">维护/停站: 15%</span>
                   </div>
                 </div>
                 <div class="progress">
-                  <div class="progress-bar bg-warning" id="maintenance-status-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+                  <div class="progress-bar bg-warning" id="maintenance-status-bar" role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100" style="width: 15%;"></div>
                 </div>
               </div>
             </div>
@@ -456,6 +456,13 @@
   let fishChart = null;
   let waterQualityPieChart = null;
   let basinOverviewChart = null;
+  
+  // 默认选项设置
+  const DEFAULT_PROVINCE = "上海市";
+  const DEFAULT_BASIN = "长江流域";
+  const DEFAULT_STATION = "吴淞口";
+  const DEFAULT_MONTH = "2021-04";
+  const DEFAULT_PARAMETER = "pH";
   
   // 参数映射表
   const parameterMapping = {
@@ -543,6 +550,29 @@
     const g = Math.floor(Math.random() * 200) + 20;
     const b = Math.floor(Math.random() * 200) + 20;
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  
+  /**
+   * 设置下拉框的选项并选中指定值
+   * @param {string} selectId - 下拉框元素ID
+   * @param {Array} options - 选项数组
+   * @param {string} selectedValue - 要选中的值
+   * @param {Function} textFunction - 从选项中获取文本的函数
+   */
+  function setSelectOptions(selectId, options, selectedValue, textFunction = (opt) => opt) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = '';
+    
+    options.forEach(option => {
+      const optionEl = document.createElement('option');
+      optionEl.value = typeof option === 'object' ? option.value || option.name : option;
+      optionEl.textContent = textFunction(option);
+      select.appendChild(optionEl);
+    });
+    
+    if (selectedValue) {
+      select.value = selectedValue;
+    }
   }
   
   // ============= 鱼类数据相关 ===============
@@ -649,7 +679,7 @@
   // ============= 水质数据相关 ===============
   
   /**
-   * 加载省份列表
+   * 加载省份列表并选择默认省份
    */
   function loadProvinces() {
     fetch('/dyn_dt/api/water/provinces')
@@ -665,6 +695,12 @@
             option.textContent = province;
             provinceSelect.appendChild(option);
           });
+          
+          // 设置默认省份并加载相应的流域
+          if (data.provinces.includes(DEFAULT_PROVINCE)) {
+            provinceSelect.value = DEFAULT_PROVINCE;
+            loadBasins(DEFAULT_PROVINCE);
+          }
           
           // 计算站点总数
           let totalStations = 0;
@@ -690,7 +726,7 @@
   }
   
   /**
-   * 加载流域列表
+   * 加载流域列表并选择默认流域
    * @param {string} province - 省份名称
    */
   function loadBasins(province) {
@@ -709,6 +745,12 @@
             option.textContent = basin;
             basinSelect.appendChild(option);
           });
+          
+          // 设置默认流域并加载相应的站点
+          if (data.basins.includes(DEFAULT_BASIN)) {
+            basinSelect.value = DEFAULT_BASIN;
+            loadStations(province, DEFAULT_BASIN);
+          }
         }
       })
       .catch(error => {
@@ -718,7 +760,7 @@
   }
   
   /**
-   * 加载站点列表
+   * 加载站点列表并选择默认站点
    * @param {string} province - 省份名称
    * @param {string} basin - 流域名称
    */
@@ -738,6 +780,16 @@
             option.textContent = station.name;
             stationSelect.appendChild(option);
           });
+          
+          // 设置默认站点并加载相应的月份
+          if (data.stations.some(s => s.name === DEFAULT_STATION)) {
+            stationSelect.value = DEFAULT_STATION;
+            loadAvailableMonths(province, basin, DEFAULT_STATION);
+          } else if (data.stations.length > 0) {
+            // 如果没有默认站点，选择第一个站点
+            stationSelect.value = data.stations[0].name;
+            loadAvailableMonths(province, basin, data.stations[0].name);
+          }
         }
       })
       .catch(error => {
@@ -747,7 +799,7 @@
   }
   
   /**
-   * 加载可用月份
+   * 加载可用月份并选择默认月份
    * @param {string} province - 省份名称
    * @param {string} basin - 流域名称
    * @param {string} station - 站点名称
@@ -769,11 +821,16 @@
             monthSelect.appendChild(option);
           });
           
-          // 自动选择第一个月份
-          if (data.available_months.length > 0) {
+          // 设置默认月份并加载参数列表
+          if (data.available_months.includes(DEFAULT_MONTH)) {
+            monthSelect.value = DEFAULT_MONTH;
+          } else if (data.available_months.length > 0) {
+            // 如果没有默认月份，选择第一个月份
             monthSelect.value = data.available_months[0];
-            loadWaterParameters();
           }
+          
+          // 加载参数列表
+          loadWaterParameters();
         }
       })
       .catch(error => {
@@ -783,7 +840,7 @@
   }
   
   /**
-   * 加载水质参数列表
+   * 加载水质参数列表并选择默认参数
    */
   function loadWaterParameters() {
     const parameterBadgesContainer = document.getElementById('parameter-badges');
@@ -810,14 +867,24 @@
               });
               
               parameterBadgesContainer.appendChild(badge);
+              
+              // 设置默认参数
+              if (param.id === DEFAULT_PARAMETER) {
+                badge.classList.add('active');
+              }
             }
           });
           
-          // 默认选中第一个参数
-          const firstBadge = document.querySelector('.parameter-badge');
-          if (firstBadge) {
-            firstBadge.classList.add('active');
+          // 如果没有找到默认参数，选择第一个参数
+          if (!document.querySelector('.parameter-badge.active')) {
+            const firstBadge = document.querySelector('.parameter-badge');
+            if (firstBadge) {
+              firstBadge.classList.add('active');
+            }
           }
+          
+          // 自动加载水质数据
+          loadWaterTrendData();
         }
       })
       .catch(error => {
@@ -837,7 +904,7 @@
     const parameterBadge = document.querySelector('.parameter-badge.active');
     
     if (!province || !basin || !station || !month || !parameterBadge) {
-      alert('请选择完整的数据筛选条件');
+      console.warn('数据筛选条件不完整，无法加载水质趋势数据');
       return;
     }
     
