@@ -124,13 +124,67 @@
         <div class="col-4 mb-4">
           <div class="card h-100">
             <div class="card-header">
-              <h6 class="mb-0">其他模块</h6>
+              <h6 class="mb-0">视频展示</h6>
             </div>
             <div class="card-body d-flex align-items-center justify-content-center">
-              <p class="text-muted">这里是新增容器的内容，可以填加其他内容。</p>
+              <!-- 轮播容器 -->
+              <div id="videoCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner" id="carouselVideos">
+                  <!-- 视频项会通过JS动态加载 -->
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#videoCarousel" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#videoCarousel" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
+        
+        <script>
+          // 使用相对路径获取视频文件路径
+          const videoPaths = [
+            'static/assets/media/fish/fish1.mp4',
+            'static/assets/media/fish/fish2.mp4',
+            'static/assets/media/fish/fish3.mp4',
+            'static/assets/media/fish/fish4.mp4',
+            // 在此添加其他视频文件路径
+          ];
+
+          const carouselContainer = document.getElementById('carouselVideos');
+
+          videoPaths.forEach((videoPath, index) => {
+            const videoItem = document.createElement('div');
+            videoItem.classList.add('carousel-item');
+            if (index === 0) {
+              videoItem.classList.add('active');
+            }
+
+            const videoElement = document.createElement('video');
+            videoElement.classList.add('d-block', 'w-100');
+            videoElement.src = videoPath;  // 使用相对路径
+            videoElement.controls = true;
+            videoElement.autoplay = true;  // 自动播放
+            videoElement.muted = true;  // 可以根据需求静音播放
+            videoElement.loop = false;  // 不循环播放，播放完后自动切换
+
+            // 当视频播放结束时，切换到下一个视频
+            videoElement.addEventListener('ended', () => {
+              const nextIndex = (index + 1) % videoPaths.length;  // 循环播放
+              const nextVideoItem = carouselContainer.children[nextIndex];
+              const carousel = document.getElementById('videoCarousel');
+              const carouselInstance = new bootstrap.Carousel(carousel);  // 使用Bootstrap Carousel
+              carouselInstance.to(nextIndex);  // 切换到下一个视频
+            });
+
+            videoItem.appendChild(videoElement);
+            carouselContainer.appendChild(videoItem);
+          });
+        </script>
       </div>
 
       <!-- 在 "设备情况" 卡片后面添加新的行 -->
