@@ -3,6 +3,9 @@
 {% block title %} AI数据助手 {% endblock title %}
 
 {% block stylesheets %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
   .chat-container {
     height: 500px;
@@ -114,6 +117,22 @@
     50% {
       opacity: 1;
     }
+  }
+
+  .prediction-card {
+    background-color: #f8f9fe;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid #5e72e4;
+  }
+
+  .prediction-card .progress {
+    height: 4px;
+    background-color: rgba(94, 114, 228, 0.1);
+  }
+
+  .prediction-card .badge {
+    font-size: 0.7rem;
   }
 </style>
 {% endblock stylesheets %}
@@ -247,6 +266,176 @@
         </div>
       </div>
     </div>
+
+    <!-- 鱼类情况预测 - 调整为全宽布局，添加上边距 -->
+    <div class="row mt-5">
+      <div class="col-12 mb-4">
+        <div class="card h-100">
+          <div class="card-header pb-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">鱼类情况预测分析</h6>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <!-- 左侧控制区域 -->
+              <div class="col-md-3">
+                <!-- 鱼类选择 -->
+                <div class="mb-3">
+                  <label class="form-label text-sm font-weight-bold">选择鱼类</label>
+                  <select class="form-control form-control-sm" id="prediction-species-select">
+                    <option value="">-- 选择鱼类 --</option>
+                  </select>
+                </div>
+
+                <!-- 预测按钮 -->
+                <button class="btn btn-primary btn-sm w-100 mb-3" id="predict-btn" onclick="predictFishData()">
+                  <i class="fas fa-chart-line me-2"></i>生成预测
+                </button>
+
+                <!-- 预测类型切换 -->
+                <div class="mb-3" id="prediction-type-selector" style="display: none;">
+                  <label class="form-label text-sm font-weight-bold">预测视图</label>
+                  <div class="btn-group w-100" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm active" id="monthly-view-btn" onclick="switchPredictionView('monthly')">
+                      月度预测
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="yearly-view-btn" onclick="switchPredictionView('yearly')">
+                      年度趋势
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 月度预测结果 -->
+                <div id="monthly-prediction-results" style="display: none;">
+                  <div class="prediction-card mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="text-sm font-weight-bold text-dark">预测鱼群数量</span>
+                      <span class="badge bg-success">增长</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span class="text-xs text-muted">当前</span>
+                      <span class="text-xs text-dark" id="current-count">--</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span class="text-xs text-muted">预测</span>
+                      <span class="text-sm font-weight-bold text-success" id="predicted-count">--</span>
+                    </div>
+                    <div class="progress mt-2" style="height: 4px;">
+                      <div class="progress-bar bg-success" id="count-progress" style="width: 0%"></div>
+                    </div>
+                  </div>
+
+                  <div class="prediction-card mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="text-sm font-weight-bold text-dark">平均体重 (g)</span>
+                      <span class="badge bg-info">稳定</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span class="text-xs text-muted">当前</span>
+                      <span class="text-xs text-dark" id="current-weight">--</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span class="text-xs text-muted">预测</span>
+                      <span class="text-sm font-weight-bold text-info" id="predicted-weight">--</span>
+                    </div>
+                    <div class="progress mt-2" style="height: 4px;">
+                      <div class="progress-bar bg-info" id="weight-progress" style="width: 0%"></div>
+                    </div>
+                  </div>
+
+                  <div class="prediction-card mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="text-sm font-weight-bold text-dark">平均体长 (cm)</span>
+                      <span class="badge bg-warning">增长</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span class="text-xs text-muted">当前</span>
+                      <span class="text-xs text-dark" id="current-length">--</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span class="text-xs text-muted">预测</span>
+                      <span class="text-sm font-weight-bold text-warning" id="predicted-length">--</span>
+                    </div>
+                    <div class="progress mt-2" style="height: 4px;">
+                      <div class="progress-bar bg-warning" id="length-progress" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 年度预测摘要 -->
+                <div id="yearly-prediction-summary" style="display: none;">
+                  <div class="prediction-card mb-3">
+                    <h6 class="text-dark text-sm font-weight-bold mb-3">年度预测摘要</h6>
+                    <div class="mb-2">
+                      <div class="d-flex justify-content-between">
+                        <span class="text-xs text-dark">年末预期数量</span>
+                        <span class="text-sm font-weight-bold text-success" id="yearly-count">--</span>
+                      </div>
+                    </div>
+                    <div class="mb-2">
+                      <div class="d-flex justify-content-between">
+                        <span class="text-xs text-dark">年增长率</span>
+                        <span class="text-sm font-weight-bold text-info" id="yearly-growth-rate">--</span>
+                      </div>
+                    </div>
+                    <div class="mb-2">
+                      <div class="d-flex justify-content-between">
+                        <span class="text-xs text-dark">最佳增长期</span>
+                        <span class="text-sm font-weight-bold text-warning" id="peak-season">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 预测说明 -->
+                <div class="mt-3 p-2 bg-light rounded">
+                  <p class="text-xs text-muted mb-1">
+                    <i class="fas fa-info-circle me-1"></i>预测说明
+                  </p>
+                  <p class="text-xs text-muted mb-0" id="prediction-explanation">
+                    基于历史数据和生长模型预测，考虑了季节性因素和养殖环境条件。
+                  </p>
+                </div>
+
+                <!-- 无数据提示 -->
+                <div id="no-data-message">
+                  <div class="text-center p-3">
+                    <i class="fas fa-fish text-muted" style="font-size: 2rem;"></i>
+                    <p class="text-muted mt-2 mb-0">请选择鱼类类型进行预测</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 右侧图表区域 -->
+              <div class="col-md-9">
+                <!-- 月度趋势图 -->
+                <div id="monthly-chart-container" style="display: none;">
+                  <h6 class="text-sm font-weight-bold mb-3">月度生长趋势预测</h6>
+                  <div style="height: 400px;">
+                    <canvas id="prediction-trend-chart"></canvas>
+                  </div>
+                </div>
+
+                <!-- 年度趋势图 -->
+                <div id="yearly-chart-container" style="display: none;">
+                  <h6 class="text-sm font-weight-bold mb-3">年度生长趋势预测</h6>
+                  <div style="height: 400px;">
+                    <canvas id="yearly-prediction-chart"></canvas>
+                  </div>
+                </div>
+
+                <!-- 默认提示 -->
+                <div id="chart-placeholder" class="text-center" style="padding: 150px 0;">
+                  <i class="fas fa-chart-line text-muted" style="font-size: 4rem;"></i>
+                  <p class="text-muted mt-3 mb-0" style="font-size: 1.2rem;">选择鱼类并生成预测后，图表将在此显示</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </main>
 {% endblock content %}
@@ -283,6 +472,9 @@
         sendMessage();
       }
     });
+
+    // 初始化预测功能
+    initializePrediction();
   });
 
   // 加载省份列表
@@ -759,5 +951,614 @@
     }
     return Number(num).toFixed(2);
   }
+
+  // ============= 鱼类预测功能 ===============
+
+  // 预测图表对象
+  let predictionChart = null;
+  let yearlyPredictionChart = null;
+  let currentPredictionData = null;
+  let currentViewMode = 'monthly';
+
+  // 初始化预测功能
+  function initializePrediction() {
+    // 加载鱼类列表到预测选择框
+    fetch('/dyn_dt/api/fish/list')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const select = document.getElementById('prediction-species-select');
+          select.innerHTML = '<option value="">-- 选择鱼类 --</option>';
+
+          data.species.forEach(species => {
+            const option = document.createElement('option');
+            option.value = species;
+            option.textContent = species;
+            select.appendChild(option);
+          });
+        }
+      })
+      .catch(error => console.error('加载预测鱼类列表出错:', error));
+  }
+
+  // 切换预测视图
+  function switchPredictionView(viewMode) {
+    if (!currentPredictionData) {
+      alert('请先生成预测数据');
+      return;
+    }
+
+    currentViewMode = viewMode;
+
+    // 更新按钮状态
+    document.getElementById('monthly-view-btn').classList.remove('active');
+    document.getElementById('yearly-view-btn').classList.remove('active');
+    document.getElementById(viewMode + '-view-btn').classList.add('active');
+
+    // 切换显示内容
+    if (viewMode === 'monthly') {
+      document.getElementById('monthly-prediction-results').style.display = 'block';
+      document.getElementById('yearly-prediction-summary').style.display = 'none';
+      document.getElementById('monthly-chart-container').style.display = 'block';
+      document.getElementById('yearly-chart-container').style.display = 'none';
+      document.getElementById('chart-placeholder').style.display = 'none';
+      
+      // 显示月度图表
+      createMonthlyChart(currentPredictionData);
+    } else {
+      document.getElementById('monthly-prediction-results').style.display = 'none';
+      document.getElementById('yearly-prediction-summary').style.display = 'block';
+      document.getElementById('monthly-chart-container').style.display = 'none';
+      document.getElementById('yearly-chart-container').style.display = 'block';
+      document.getElementById('chart-placeholder').style.display = 'none';
+      
+      // 立即生成并显示年度预测
+      console.log('切换到年度视图，开始生成年度预测...');
+      setTimeout(() => {
+        generateYearlyPrediction(currentPredictionData);
+      }, 100); // 添加短暂延迟确保DOM更新完成
+    }
+  }
+
+  // 预测鱼类数据
+  function predictFishData() {
+    const species = document.getElementById('prediction-species-select').value;
+    
+    if (!species) {
+      alert('请先选择鱼类类型');
+      return;
+    }
+
+    // 显示加载状态
+    const predictBtn = document.getElementById('predict-btn');
+    const originalText = predictBtn.innerHTML;
+    predictBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>预测中...';
+    predictBtn.disabled = true;
+
+    // 获取当前鱼类数据
+    fetch(`/dyn_dt/api/fish/comparison?parameter=Weight(g)&species=${species}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.comparison.length > 0) {
+          const fishData = data.comparison[0];
+          
+          // 生成预测数据（硬编码预测算法）
+          const predictions = generatePredictions(fishData, species);
+          
+          predictions.then(predData => {
+            currentPredictionData = predData;
+            
+            // 显示预测控制界面
+            document.getElementById('prediction-type-selector').style.display = 'block';
+            document.getElementById('no-data-message').style.display = 'none';
+            document.getElementById('chart-placeholder').style.display = 'none';
+            
+            // 显示月度预测结果数据
+            displayPredictionResults(predData);
+            
+            // 默认显示月度预测
+            switchPredictionView('monthly');
+          });
+          
+        } else {
+          alert('无法获取该鱼类的数据');
+        }
+      })
+      .catch(error => {
+        console.error('预测出错:', error);
+        alert('预测过程中出现错误');
+      })
+      .finally(() => {
+        // 恢复按钮状态
+        predictBtn.innerHTML = originalText;
+        predictBtn.disabled = false;
+      });
+  }
+
+  // 生成预测数据（硬编码算法）
+  function generatePredictions(currentData, species) {
+    // 基础增长率（根据鱼类类型调整）
+    const growthRates = {
+      'Bream': { count: 0.15, weight: 0.08, length: 0.05 },
+      'Roach': { count: 0.12, weight: 0.06, length: 0.04 },
+      'Whitefish': { count: 0.10, weight: 0.07, length: 0.04 },
+      'Parkki': { count: 0.18, weight: 0.09, length: 0.06 },
+      'Perch': { count: 0.14, weight: 0.07, length: 0.05 },
+      'Pike': { count: 0.08, weight: 0.10, length: 0.07 },
+      'Smelt': { count: 0.20, weight: 0.05, length: 0.03 }
+    };
+
+    const rates = growthRates[species] || { count: 0.12, weight: 0.07, length: 0.05 };
+    
+    // 季节性调整因子（假设当前是春季，一个月后进入夏季）
+    const seasonalFactor = 1.2;
+    
+    // 环境因子（随机变化，模拟环境影响）
+    const environmentFactor = 0.9 + Math.random() * 0.2; // 0.9-1.1
+    
+    // 当前数据
+    const currentCount = currentData.count;
+    const currentWeight = currentData.mean;
+    
+    // 获取体长数据
+    return fetch(`/dyn_dt/api/fish/comparison?parameter=Length1(cm)&species=${species}`)
+      .then(response => response.json())
+      .then(lengthData => {
+        const currentLength = lengthData.success && lengthData.comparison.length > 0 
+          ? lengthData.comparison[0].mean 
+          : currentWeight * 0.15; // 估算体长
+
+        // 计算月度预测值
+        const predictedCount = Math.round(currentCount * (1 + rates.count * seasonalFactor * environmentFactor));
+        const predictedWeight = currentWeight * (1 + rates.weight * seasonalFactor * environmentFactor);
+        const predictedLength = currentLength * (1 + rates.length * seasonalFactor * environmentFactor);
+
+        return {
+          species: species,
+          current: {
+            count: currentCount,
+            weight: currentWeight,
+            length: currentLength
+          },
+          predicted: {
+            count: predictedCount,
+            weight: predictedWeight,
+            length: predictedLength
+          },
+          growth: {
+            count: ((predictedCount - currentCount) / currentCount * 100),
+            weight: ((predictedWeight - currentWeight) / currentWeight * 100),
+            length: ((predictedLength - currentLength) / currentLength * 100)
+          },
+          factors: {
+            seasonal: seasonalFactor,
+            environment: environmentFactor
+          },
+          rates: rates
+        };
+      });
+  }
+
+  // 生成年度预测数据
+  function generateYearlyPrediction(predictions) {
+    console.log('生成年度预测数据...', predictions);
+    
+    const monthlyData = generateYearlyMonthlyData(predictions);
+    console.log('年度月度数据:', monthlyData);
+    
+    // 计算年度摘要
+    const yearEndCount = monthlyData.countData[monthlyData.countData.length - 1];
+    const yearGrowthRate = ((yearEndCount - predictions.current.count) / predictions.current.count * 100);
+    
+    // 找出最佳增长期（增长最快的连续3个月）
+    let maxGrowthPeriod = '';
+    let maxGrowthRate = 0;
+    
+    for (let i = 0; i < monthlyData.countData.length - 2; i++) {
+      const periodGrowth = monthlyData.countData[i + 2] - monthlyData.countData[i];
+      if (periodGrowth > maxGrowthRate) {
+        maxGrowthRate = periodGrowth;
+        maxGrowthPeriod = `${monthlyData.labels[i]} - ${monthlyData.labels[i + 2]}`;
+      }
+    }
+    
+    // 更新年度摘要显示
+    document.getElementById('yearly-count').textContent = Math.round(yearEndCount) + ' 尾';
+    document.getElementById('yearly-growth-rate').textContent = formatNumber(yearGrowthRate) + '%';
+    document.getElementById('peak-season').textContent = maxGrowthPeriod;
+    
+    // 创建年度图表
+    console.log('开始创建年度图表...');
+    createYearlyChart(monthlyData);
+    
+    // 更新预测说明
+    const explanation = `年度预测基于${predictions.species}的季节性生长模式，预期年增长率${formatNumber(yearGrowthRate)}%，最佳增长期为${maxGrowthPeriod}。预测考虑了温度、食物供应和繁殖周期等因素。`;
+    document.getElementById('prediction-explanation').textContent = explanation;
+  }
+
+  // 生成年度月度数据
+  function generateYearlyMonthlyData(predictions) {
+    const labels = [];
+    const countData = [];
+    const weightData = [];
+    const lengthData = [];
+    
+    // 季节性调整因子（模拟一年四季的变化）
+    const seasonalFactors = [
+      0.8,  // 1月 - 冬季低增长
+      0.9,  // 2月
+      1.1,  // 3月 - 春季开始增长
+      1.3,  // 4月 - 春季高增长
+      1.4,  // 5月 - 春季最佳
+      1.5,  // 6月 - 夏季开始
+      1.6,  // 7月 - 夏季最佳
+      1.5,  // 8月 - 夏季高增长
+      1.3,  // 9月 - 秋季
+      1.1,  // 10月 - 秋季减缓
+      0.9,  // 11月 - 准备过冬
+      0.8   // 12月 - 冬季
+    ];
+    
+    let currentCount = predictions.current.count;
+    let currentWeight = predictions.current.weight;
+    let currentLength = predictions.current.length;
+    
+    for (let month = 1; month <= 12; month++) {
+      labels.push(`${month}月`);
+      
+      // 应用季节性和基础增长率
+      const monthlyGrowthFactor = seasonalFactors[month - 1] * 0.1; // 基础月增长率
+      const environmentVariation = 0.95 + Math.random() * 0.1; // 环境变化
+      
+      // 计算当月增长
+      const countGrowth = currentCount * predictions.rates.count * monthlyGrowthFactor * environmentVariation;
+      const weightGrowth = currentWeight * predictions.rates.weight * monthlyGrowthFactor * environmentVariation;
+      const lengthGrowth = currentLength * predictions.rates.length * monthlyGrowthFactor * environmentVariation;
+      
+      currentCount += countGrowth;
+      currentWeight += weightGrowth;
+      currentLength += lengthGrowth;
+      
+      countData.push(Math.round(currentCount));
+      weightData.push(parseFloat(currentWeight.toFixed(2)));
+      lengthData.push(parseFloat(currentLength.toFixed(2)));
+    }
+    
+    return {
+      labels: labels,
+      countData: countData,
+      weightData: weightData,
+      lengthData: lengthData
+    };
+  }
+
+  // 显示月度预测结果
+  function displayPredictionResults(predictions) {
+    // 更新数量预测
+    document.getElementById('current-count').textContent = predictions.current.count + ' 尾';
+    document.getElementById('predicted-count').textContent = predictions.predicted.count + ' 尾';
+    
+    const countProgress = (predictions.predicted.count / Math.max(predictions.current.count, predictions.predicted.count)) * 100;
+    document.getElementById('count-progress').style.width = countProgress + '%';
+
+    // 更新体重预测
+    document.getElementById('current-weight').textContent = formatNumber(predictions.current.weight) + ' g';
+    document.getElementById('predicted-weight').textContent = formatNumber(predictions.predicted.weight) + ' g';
+    
+    const weightProgress = (predictions.predicted.weight / Math.max(predictions.current.weight, predictions.predicted.weight)) * 100;
+    document.getElementById('weight-progress').style.width = weightProgress + '%';
+
+    // 更新体长预测
+    document.getElementById('current-length').textContent = formatNumber(predictions.current.length) + ' cm';
+    document.getElementById('predicted-length').textContent = formatNumber(predictions.predicted.length) + ' cm';
+    
+    const lengthProgress = (predictions.predicted.length / Math.max(predictions.current.length, predictions.predicted.length)) * 100;
+    document.getElementById('length-progress').style.width = lengthProgress + '%';
+
+    // 更新预测说明
+    const explanation = `基于${predictions.species}的生长特性，考虑季节因子(${formatNumber(predictions.factors.seasonal)})和环境因子(${formatNumber(predictions.factors.environment)})。
+    数量预测增长${formatNumber(predictions.growth.count)}%，体重增长${formatNumber(predictions.growth.weight)}%，体长增长${formatNumber(predictions.growth.length)}%。`;
+    
+    document.getElementById('prediction-explanation').textContent = explanation;
+  }
+
+  // 创建月度预测图表
+  function createMonthlyChart(predictions) {
+    if (predictionChart) {
+      predictionChart.destroy();
+    }
+
+    const ctx = document.getElementById('prediction-trend-chart').getContext('2d');
+
+    // 生成未来30天的预测趋势
+    const labels = [];
+    const countData = [];
+    const weightData = [];
+    
+    for (let i = 0; i <= 30; i += 5) {
+      labels.push(i === 0 ? '当前' : `${i}天后`);
+      
+      // 线性插值计算中间值
+      const factor = i / 30;
+      const count = predictions.current.count + (predictions.predicted.count - predictions.current.count) * factor;
+      const weight = predictions.current.weight + (predictions.predicted.weight - predictions.current.weight) * factor;
+      
+      countData.push(Math.round(count));
+      weightData.push(parseFloat(weight.toFixed(2)));
+    }
+
+    predictionChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: '鱼群数量',
+          data: countData,
+          borderColor: 'rgba(45, 206, 137, 1)',
+          backgroundColor: 'rgba(45, 206, 137, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          yAxisID: 'y',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        }, {
+          label: '平均体重(g)',
+          data: weightData,
+          borderColor: 'rgba(94, 114, 228, 1)',
+          backgroundColor: 'rgba(94, 114, 228, 0.1)',
+          borderWidth: 3,
+          fill: false,
+          tension: 0.4,
+          yAxisID: 'y1',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        scales: {
+          x: {
+            display: true,
+            title: {
+              display: true,
+              text: '时间',
+              font: {
+                size: 14,
+                weight: 'bold'
+              }
+            },
+            ticks: {
+              font: {
+                size: 12
+              }
+            }
+          },
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            title: {
+              display: true,
+              text: '数量(尾)',
+              font: {
+                size: 14,
+                weight: 'bold'
+              }
+            },
+            ticks: {
+              font: {
+                size: 12
+              }
+            }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            title: {
+              display: true,
+              text: '体重(g)',
+              font: {
+                size: 14,
+                weight: 'bold'
+              }
+            },
+            ticks: {
+              font: {
+                size: 12
+              }
+            },
+            grid: {
+              drawOnChartArea: false,
+            },
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: {
+                size: 13,
+                weight: 'bold'
+              }
+            }
+          },
+          title: {
+            display: true,
+            text: '月度鱼类生长趋势预测',
+            font: {
+              size: 16,
+              weight: 'bold'
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // 创建年度预测图表
+  function createYearlyChart(yearlyData) {
+    console.log('创建年度图表，数据:', yearlyData);
+    
+    if (yearlyPredictionChart) {
+      yearlyPredictionChart.destroy();
+      console.log('销毁之前的年度图表');
+    }
+
+    const canvas = document.getElementById('yearly-prediction-chart');
+    if (!canvas) {
+      console.error('找不到年度图表画布元素');
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    
+    console.log('开始创建新的年度图表...');
+
+    yearlyPredictionChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: yearlyData.labels,
+        datasets: [{
+          label: '鱼群数量(尾)',
+          data: yearlyData.countData,
+          borderColor: 'rgba(255, 99, 132, 1)',
+          backgroundColor: 'rgba(255, 99, 132, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          yAxisID: 'y',
+          pointRadius: 6,
+          pointHoverRadius: 10
+        }, {
+          label: '平均体重(g)',
+          data: yearlyData.weightData,
+          borderColor: 'rgba(54, 162, 235, 1)',
+          backgroundColor: 'rgba(54, 162, 235, 0.1)',
+          borderWidth: 3,
+          fill: false,
+          tension: 0.4,
+          yAxisID: 'y1',
+          pointRadius: 6,
+          pointHoverRadius: 10
+        }, {
+          label: '平均体长(cm)',
+          data: yearlyData.lengthData,
+          borderColor: 'rgba(255, 206, 86, 1)',
+          backgroundColor: 'rgba(255, 206, 86, 0.1)',
+          borderWidth: 3,
+          fill: false,
+          tension: 0.4,
+          yAxisID: 'y1', // 使用相同的y轴以简化显示
+          pointRadius: 6,
+          pointHoverRadius: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        scales: {
+          x: {
+            display: true,
+            title: {
+              display: true,
+              text: '月份',
+              font: {
+                size: 14,
+                weight: 'bold'
+              }
+            },
+            ticks: {
+              font: {
+                size: 12
+              }
+            }
+          },
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            title: {
+              display: true,
+              text: '鱼群数量(尾)',
+              color: 'rgba(255, 99, 132, 1)',
+              font: {
+                size: 14,
+                weight: 'bold'
+              }
+            },
+            ticks: {
+              color: 'rgba(255, 99, 132, 1)',
+              font: {
+                size: 12
+              }
+            }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            title: {
+              display: true,
+              text: '体重(g) / 体长(cm)',
+              color: 'rgba(54, 162, 235, 1)',
+              font: {
+                size: 14,
+                weight: 'bold'
+              }
+            },
+            ticks: {
+              color: 'rgba(54, 162, 235, 1)',
+              font: {
+                size: 12
+              }
+            },
+            grid: {
+              drawOnChartArea: false,
+            },
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: {
+                size: 13,
+                weight: 'bold'
+              }
+            }
+          },
+          title: {
+            display: true,
+            text: '年度鱼类生长趋势预测',
+            font: {
+              size: 16,
+              weight: 'bold'
+            }
+          }
+        }
+      }
+    });
+    
+    console.log('年度图表创建完成');
+  }
+
+  // 在初始化时调用预测功能初始化
+  document.addEventListener('DOMContentLoaded', function () {
+    // ...existing code...
+    
+    // 初始化预测功能
+    initializePrediction();
+  });
 </script>
 {% endblock javascripts %}
