@@ -78,4 +78,4 @@ if __name__ == "__main__":
         else:
             print("管理员用户已存在，跳过创建")
 
-    app.run()
+    app.run(debug=True)

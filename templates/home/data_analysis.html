@@ -57,7 +57,7 @@
     border-radius: 8px;
     margin-bottom: 8px;
     border-left: 4px solid #e9ecef;
-    background-color: #f8f9fa;
+    background-color:rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
 }
 
@@ -76,7 +76,7 @@
 }
 
 .parameter-threshold {
-    background-color: #f8f9fa;
+    background-color: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 15px;
@@ -117,10 +117,13 @@
 }
 
 .alert-settings-panel {
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
     border-radius: 12px;
-    padding: 20px;
+    padding: 22px;
     margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: none;
+    color: white;
 }
 
 .settings-toggle {
@@ -160,6 +163,40 @@
     border-radius: 50%;
 }
 
+/* 通知展开/收起功能样式 */
+.notification-container {
+    max-height: 300px;
+    overflow-y: auto;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.notification-container.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* 移除渐变效果，因为现在我们完全隐藏内容 */
+.notification-container.collapsed:after {
+    display: none;
+}
+
+/* 添加一个空状态提示 */
+.notification-empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+    display: none;
+}
+
+.notification-container.collapsed + .notification-empty-state {
+    display: block;
+}
+
+
+
 input:checked + .slider {
     background-color: #2196F3;
 }
@@ -189,10 +226,12 @@ input:checked + .slider:before {
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-8 mx-auto">
-                                <div class="search-container">
-                                    <input type="text" class="form-control" id="searchInput" placeholder="输入设备ID、参数名或关键词...">
+                                <div class="search-container d-flex">
+                                    <div class="flex-grow-1 me-2">
+                                        <input type="text" class="form-control" id="searchInput" placeholder="输入设备ID、参数名或关键词...">
+                                    </div>
                                     <button class="btn btn-primary" type="button" id="searchButton">
-                                        <i class="fas fa-search"></i> search
+                                        <i class="fas fa-search"></i> 搜索
                                     </button>
                                 </div>
                             </div>
@@ -201,7 +240,6 @@ input:checked + .slider:before {
                 </div>
             </div>
         </div>
-
         <!-- 报警与通知模块 -->
         <div class="row mb-4">
             <!-- 实时监控面板 -->
@@ -382,16 +420,25 @@ input:checked + .slider:before {
                             <i class="fas fa-bell text-info me-2"></i>
                             通知历史
                         </h6>
-                        <div class="btn-group btn-group-sm">
-                            <button type="button" class="btn btn-outline-primary active" data-filter="all">全部</button>
-                            <button type="button" class="btn btn-outline-warning" data-filter="warning">警告</button>
-                            <button type="button" class="btn btn-outline-danger" data-filter="danger">危险</button>
-                            <button type="button" class="btn btn-outline-secondary" data-filter="info">信息</button>
+                        <div class="d-flex align-items-center">
+                            <div class="btn-group btn-group-sm me-3">
+                                <button type="button" class="btn btn-outline-primary active" data-filter="all">全部</button>
+                                <button type="button" class="btn btn-outline-warning" data-filter="warning">警告</button>
+                                <button type="button" class="btn btn-outline-danger" data-filter="danger">危险</button>
+                                <button type="button" class="btn btn-outline-secondary" data-filter="info">信息</button>
+                            </div>
+                            <button id="toggleNotifications" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-chevron-down"></i> 展开
+                            </button>
                         </div>
                     </div>
                     <div class="card-body">
-                        <div id="notification-history">
+                        <div id="notification-history" class="notification-container collapsed">
                             <!-- 动态加载通知历史 -->
+                        </div>
+                        <div class="notification-empty-state">
+                            <i class="fas fa-bell-slash fa-2x mb-3"></i>
+                            <p>通知已收起，点击"展开"按钮查看通知历史</p>
                         </div>
                     </div>
                 </div>
@@ -1788,6 +1835,39 @@ var maintenanceCalendarOptions = {
         }
     }
 };
+
+const toggleNotificationsBtn = document.getElementById('toggleNotifications');
+const notificationContainer = document.getElementById('notification-history');
+
+toggleNotificationsBtn.addEventListener('click', function() {
+    notificationContainer.classList.toggle('collapsed');
+    
+    if (notificationContainer.classList.contains('collapsed')) {
+        toggleNotificationsBtn.innerHTML = '<i class="fas fa-chevron-down"></i> 展开';
+        // 添加延迟，等待过渡动画完成后再清空内容
+        setTimeout(() => {
+            if (notificationContainer.classList.contains('collapsed')) {
+                // 保存当前内容到内存中
+                notificationContainer.dataset.savedContent = notificationContainer.innerHTML;
+                // 清空内容
+                notificationContainer.innerHTML = '';
+            }
+        }, 300); // 与CSS过渡时间匹配
+    } else {
+        toggleNotificationsBtn.innerHTML = '<i class="fas fa-chevron-up"></i> 收起';
+        // 如果有保存的内容，恢复它
+        if (notificationContainer.dataset.savedContent) {
+            notificationContainer.innerHTML = notificationContainer.dataset.savedContent;
+        } else {
+            // 如果没有保存的内容，重新加载通知历史
+            alertSystem.updateNotificationHistory();
+        }
+        // 滚动到顶部
+        setTimeout(() => {
+            notificationContainer.scrollTop = 0;
+        }, 10);
+    }
+});
 
 var maintenanceCalendar = new ApexCharts(document.querySelector("#maintenanceCalendar"), maintenanceCalendarOptions);
 maintenanceCalendar.render();
