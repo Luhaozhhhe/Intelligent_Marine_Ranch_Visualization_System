@@ -239,6 +239,9 @@
       <div class="col-12">
         <div class="d-flex justify-content-end">
           <div class="data-management-buttons">
+            <button id="export-charts-btn" class="btn btn-sm btn-info">
+              <i class="ni ni-image me-1"></i> 导出图表
+            </button>
             <button id="upload-data-btn" class="btn btn-sm btn-primary">
               <i class="ni ni-cloud-upload-96 me-1"></i> 上传数据
             </button>
@@ -609,7 +612,56 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="exportChartsModal" tabindex="-1" role="dialog" aria-labelledby="exportChartsModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <form id="exportChartsForm">
+          <div class="mb-3">
+            <label class="form-label" style="color: #343a40 !important; text-decoration: none;">图表布局</label>
+            <select class="form-control" id="export-layout">
+              <option value="2x2">2x2 (默认)</option>
+              <option value="1x4">1x4 (垂直)</option>
+              <option value="4x1">4x1 (水平)</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="color: #343a40 !important; text-decoration: none;">图片格式</label>
+            <select class="form-control" id="export-format">
+              <option value="png">PNG</option>
+              <option value="jpeg">JPEG</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="color: #343a40 !important; text-decoration: none;">图片质量</label>
+            <input type="range" class="form-range" id="export-quality" min="0.1" max="1.0" step="0.1" value="0.9">
+            <div class="d-flex justify-content-between", style="color: #343a40 !important; text-decoration: none;">
+              <small>低质量</small>
+              <small>高质量</small>
+            </div>
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="export-include-title" checked>
+            <label class="form-check-label" for="export-include-title" style="color: #343a40 !important; text-decoration: none;">包含标题和信息</label>
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="export-include-watermark" checked>
+            <label class="form-check-label" for="export-include-watermark" style="color: #343a40 !important; text-decoration: none;">包含水印</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="export-charts-confirm-btn">导出</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock content %}
+
+
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
@@ -1687,6 +1739,436 @@
     resultDiv.style.display = 'block';
   }
 
+  // ============= 导出图表功能 ===============
+
+  /**
+   * 将外部图片转换为内联图片（解决跨域问题）
+   * @param {string} url - 图片URL
+   * @returns {Promise<HTMLImageElement>} - 处理后的图片元素
+   */
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error(`加载图片失败: ${url}`));
+      img.src = url;
+    });
+  }
+
+  /**
+   * 显示导出图表配置模态框
+   */
+  function showExportChartsModal() {
+    const exportModal = new bootstrap.Modal(document.getElementById('exportChartsModal'));
+    exportModal.show();
+    
+    // 设置导出按钮事件
+    document.getElementById('export-charts-confirm-btn').onclick = function() {
+      const layout = document.getElementById('export-layout').value;
+      const format = document.getElementById('export-format').value;
+      const quality = parseFloat(document.getElementById('export-quality').value);
+      const includeTitle = document.getElementById('export-include-title').checked;
+      const includeWatermark = document.getElementById('export-include-watermark').checked;
+      
+      exportModal.hide();
+      exportAllCharts(layout, format, quality, includeTitle, includeWatermark);
+    };
+  }
+
+/**
+ * 导出所有图表合并为一张图
+ * @param {string} layout - 布局方式 ('2x2', '1x4', '4x1')
+ * @param {string} format - 图片格式 ('png', 'jpeg')
+ * @param {number} quality - 图片质量 (0.1-1.0)
+ * @param {boolean} includeTitle - 是否包含标题
+ * @param {boolean} includeWatermark - 是否包含水印
+ */
+  function exportAllCharts(layout = '2x2', format = 'png', quality = 0.9, includeTitle = true, includeWatermark = true) {
+    // 显示加载指示器
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-white bg-opacity-75';
+    loadingDiv.style.zIndex = '9999';
+    loadingDiv.innerHTML = '<div class="loading-spinner"></div><div class="ms-3">正在生成图表，请稍候...</div>';
+    document.body.appendChild(loadingDiv);
+    
+    // 给浏览器一点时间来显示加载指示器
+    setTimeout(() => {
+      try {
+        // 获取当前筛选条件
+        const province = document.getElementById('province-select').value || '全部';
+        const basin = document.getElementById('basin-select').value || '全部';
+        const station = document.getElementById('station-select').value || '全部';
+        const month = document.getElementById('month-select').value || '全部';
+        const parameterBadge = document.querySelector('.parameter-badge.active');
+        const parameter = parameterBadge ? parameterBadge.dataset.parameterId || parameterBadge.textContent : '全部';
+        const speciesSelected = document.getElementById('speciesSelect').value;
+        const parameterSelected = document.getElementById('parameterSelect').value;
+        
+        // 获取所有需要导出的图表
+        const chartsToExport = [
+          { 
+            canvas: document.getElementById('water-trend-chart'), 
+            title: '水质参数趋势',
+            description: `监测站点: ${station}, 水质参数: ${parameter}, 监测周期: ${month}`,
+            chartInstance: waterTrendChart,
+            dataSource: `数据来源: ${province} ${basin} ${station} ${month}`
+          },
+          { 
+            canvas: document.getElementById('fishChart'), 
+            title: '鱼类数据分布',
+            description: `鱼类: ${speciesMapping[speciesSelected] || speciesSelected}, 参数: ${parameterMapping[parameterSelected] || parameterSelected}`,
+            chartInstance: fishChart,
+            dataSource: `数据来源: 鱼类生物学特征数据库`
+          },
+          { 
+            canvas: document.getElementById('water-quality-pie-chart'), 
+            title: '水质类别统计',
+            description: `监测站点: ${station}, 监测周期: ${month}`,
+            chartInstance: waterQualityPieChart,
+            dataSource: `数据来源: ${province} ${basin} ${station} ${month}`
+          },
+          { 
+            canvas: document.getElementById('basin-overview-chart'), 
+            title: '流域水质概览',
+            description: `流域: ${basin}, 监测周期: ${month}, 参数: ${parameter}`,
+            chartInstance: basinOverviewChart,
+            dataSource: `数据来源: ${province} ${basin} ${month}`
+          }
+        ];
+        
+        // 筛选出有效的图表（已经渲染的）
+        const validCharts = chartsToExport.filter(chart => 
+          chart.canvas && 
+          chart.canvas.style.display !== 'none' && 
+          chart.canvas.width > 0 && 
+          chart.canvas.height > 0 &&
+          chart.chartInstance // 确保图表实例存在
+        );
+        
+        if (validCharts.length === 0) {
+          alert('没有可导出的图表！请确保至少加载了一个图表。');
+          document.body.removeChild(loadingDiv);
+          return;
+        }
+        
+        // 创建新的画布用于合并图表
+        const mergedCanvas = document.createElement('canvas');
+        const ctx = mergedCanvas.getContext('2d');
+        
+        // 计算合并后画布的尺寸和布局
+        let chartsPerRow, rows;
+        
+        if (layout === '1x4') {
+          chartsPerRow = 1;
+          rows = validCharts.length;
+        } else if (layout === '4x1') {
+          chartsPerRow = validCharts.length;
+          rows = 1;
+        } else { // 默认 2x2
+          chartsPerRow = Math.min(2, validCharts.length);
+          rows = Math.ceil(validCharts.length / chartsPerRow);
+        }
+        
+        // 增加分辨率和尺寸，提高清晰度
+        const dpr = window.devicePixelRatio || 1;
+        const chartWidth = 800;
+        const chartHeight = 500;
+        const padding = 60;
+        const titleHeight = 40; // 图表标题高度
+        const descHeight = 25; // 图表描述高度
+        const sourceHeight = 20; // 数据源信息高度
+        const headerHeight = includeTitle ? 180 : 40; // 关键修改：增加顶部区域高度，确保有足够空间
+        const footerHeight = 80; // 页脚高度
+        const chartPadding = 20; // 图表内部填充
+        
+        // 设置合并画布的尺寸
+        const canvasWidth = chartsPerRow * chartWidth + (chartsPerRow + 1) * padding;
+        const canvasHeight = headerHeight + rows * (chartHeight + titleHeight + descHeight + sourceHeight + padding) + footerHeight;
+        
+        mergedCanvas.width = canvasWidth * dpr;
+        mergedCanvas.height = canvasHeight * dpr;
+        mergedCanvas.style.width = `${canvasWidth}px`;
+        mergedCanvas.style.height = `${canvasHeight}px`;
+        
+        // 缩放以适应高DPI
+        ctx.scale(dpr, dpr);
+        
+        // 填充白色背景
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        
+        // 添加标题和日期
+        if (includeTitle) {
+          // 添加标题背景 - 扩展标题区域的高度
+          ctx.fillStyle = '#f8f9fa';
+          ctx.fillRect(0, 0, canvasWidth, headerHeight);
+          
+          // 添加标题边框
+          ctx.strokeStyle = '#e9ecef';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(0, 0, canvasWidth, headerHeight);
+          
+          // 添加主标题
+          ctx.fillStyle = '#5e72e4';
+          ctx.font = 'bold 32px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('水产养殖数据监控平台 - 图表汇总', canvasWidth / 2, padding);
+          
+          // 添加当前日期和筛选条件 - 使用多行显示，确保信息完整
+          ctx.fillStyle = '#525f7f';
+          ctx.font = 'bold 18px Arial';
+          const today = new Date().toLocaleDateString();
+          ctx.fillText(`导出日期: ${today}`, canvasWidth / 2, padding + 35);
+          
+          // 使用更清晰的布局显示筛选条件
+          ctx.font = 'bold 16px Arial';
+          ctx.fillText(`省份: ${province}`, canvasWidth / 2, padding + 65);
+          ctx.fillText(`流域: ${basin}`, canvasWidth / 2, padding + 90);
+          ctx.fillText(`站点: ${station} | 月份: ${month} | 参数: ${parameter}`, canvasWidth / 2, padding + 110);
+          
+          // 绘制分隔线 - 位置调整到标题区域底部
+          ctx.strokeStyle = '#e9ecef';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(padding, headerHeight - 5);
+          ctx.lineTo(canvasWidth - padding, headerHeight - 5);
+          ctx.stroke();
+        }
+        
+        // 为每个图表创建临时画布，以保留图例等信息
+        for (let i = 0; i < validCharts.length; i++) {
+          const chart = validCharts[i];
+          const chartInstance = chart.chartInstance;
+          
+          // 计算位置 - 确保图表位置在标题区域下方
+          const row = Math.floor(i / chartsPerRow);
+          const col = i % chartsPerRow;
+          
+          const x = col * (chartWidth + padding) + padding;
+          const y = headerHeight + row * (chartHeight + titleHeight + descHeight + sourceHeight + padding);
+          
+          // 绘制图表区域背景和边框
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(x - padding/2, y, 
+                      chartWidth + padding, chartHeight + titleHeight + descHeight + sourceHeight);
+          ctx.strokeStyle = '#e9ecef';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x - padding/2, y, 
+                        chartWidth + padding, chartHeight + titleHeight + descHeight + sourceHeight);
+          
+          // 绘制图表标题
+          ctx.fillStyle = '#344767';
+          ctx.font = 'bold 22px Arial';
+          ctx.textAlign = 'left';
+          ctx.fillText(chart.title, x, y + 25);
+          
+          // 绘制图表描述
+          if (chart.description) {
+            ctx.fillStyle = '#5e72e4';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText(chart.description, x, y + titleHeight + 15);
+          }
+          
+          // 创建临时画布用于绘制图表（包括图例）
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = chartWidth;
+          tempCanvas.height = chartHeight;
+          const tempCtx = tempCanvas.getContext('2d');
+          
+          // 获取图表配置
+          let chartData, chartOptions;
+          if (chartInstance) {
+            chartData = chartInstance.data;
+            chartOptions = { ...chartInstance.options }; // 创建深拷贝避免修改原始配置
+            
+            // 根据图表类型设置特定选项
+            if (chartInstance.config.type === 'pie' || chartInstance.config.type === 'doughnut') {
+              // 确保饼图图例可见
+              chartOptions.plugins = {
+                ...chartOptions.plugins,
+                legend: {
+                  display: true,
+                  position: 'right',
+                  labels: {
+                    font: {
+                      size: 14,
+                      weight: 'bold'
+                    }
+                  }
+                },
+                title: {
+                  display: false // 我们已经手动绘制标题
+                }
+              };
+            } else {
+              // 确保折线图/柱状图图例和坐标轴可见
+              chartOptions.plugins = {
+                ...chartOptions.plugins,
+                legend: {
+                  display: true,
+                  position: 'top',
+                  labels: {
+                    font: {
+                      size: 14,
+                      weight: 'bold'
+                    },
+                    padding: 15
+                  }
+                },
+                title: {
+                  display: false // 我们已经手动绘制标题
+                }
+              };
+              
+              // 确保坐标轴标签清晰可见
+              chartOptions.scales = {
+                ...chartOptions.scales,
+                x: {
+                  ...chartOptions.scales?.x,
+                  display: true,
+                  grid: {
+                    display: true,
+                    color: 'rgba(0, 0, 0, 0.1)'
+                  },
+                  ticks: {
+                    font: {
+                      size: 12,
+                      weight: 'bold'
+                    },
+                    color: '#344767'
+                  },
+                  title: {
+                    display: true,
+                    text: chartOptions.scales?.x?.title?.text || '',
+                    font: {
+                      size: 14,
+                      weight: 'bold'
+                    },
+                    color: '#344767'
+                  }
+                },
+                y: {
+                  ...chartOptions.scales?.y,
+                  display: true,
+                  grid: {
+                    display: true,
+                    color: 'rgba(0, 0, 0, 0.1)'
+                  },
+                  ticks: {
+                    font: {
+                      size: 12,
+                      weight: 'bold'
+                    },
+                    color: '#344767'
+                  },
+                  title: {
+                    display: true,
+                    text: chartOptions.scales?.y?.title?.text || '',
+                    font: {
+                      size: 14,
+                      weight: 'bold'
+                    },
+                    color: '#344767'
+                  }
+                }
+              };
+            }
+            
+            // 添加内部填充
+            chartOptions.layout = {
+              padding: {
+                top: chartPadding,
+                right: chartPadding,
+                bottom: chartPadding,
+                left: chartPadding
+              }
+            };
+            
+            // 临时创建新的Chart实例绘制到临时画布
+            new Chart(tempCtx, {
+              type: chartInstance.config.type,
+              data: chartData,
+              options: {
+                ...chartOptions,
+                animation: false,
+                responsive: false,
+                maintainAspectRatio: false
+              }
+            });
+            
+            // 绘制临时画布到合并画布 - 调整位置确保不会遮挡标题
+            ctx.drawImage(tempCanvas, x, y + titleHeight + descHeight + 10, chartWidth, chartHeight);
+            
+            // 添加数据源信息
+            if (chart.dataSource) {
+              ctx.fillStyle = '#8392ab';
+              ctx.font = 'italic 14px Arial';
+              ctx.textAlign = 'left';
+              ctx.fillText(chart.dataSource, x, y + titleHeight + descHeight + chartHeight + 30);
+            }
+          } else {
+            // 如果没有图表实例，直接绘制原始画布
+            ctx.drawImage(chart.canvas, x, y + titleHeight + descHeight + 10, chartWidth, chartHeight);
+          }
+        }
+        
+        // 添加水印和页脚
+        if (includeWatermark) {
+          // 添加页脚背景
+          ctx.fillStyle = '#f8f9fa';
+          ctx.fillRect(0, canvasHeight - footerHeight, canvasWidth, footerHeight);
+          
+          // 添加页脚边框
+          ctx.strokeStyle = '#e9ecef';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(0, canvasHeight - footerHeight, canvasWidth, footerHeight);
+          
+          // 添加水印文本
+          ctx.fillStyle = 'rgba(94, 114, 228, 0.2)';
+          ctx.font = 'italic 20px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('水产养殖数据监控平台 - 仅供内部使用', canvasWidth / 2, canvasHeight - footerHeight/2);
+          
+          // 添加导出时间和详细信息
+          const exportTime = new Date().toLocaleString();
+          ctx.fillStyle = '#344767';
+          ctx.font = '14px Arial';
+          ctx.textAlign = 'left';
+          ctx.fillText(`导出时间: ${exportTime}`, padding, canvasHeight - footerHeight/2 + 20);
+          
+          // 添加版权信息
+          ctx.textAlign = 'right';
+          ctx.fillText('版权所有 © ' + new Date().getFullYear() + ' 水产养殖数据监控平台', canvasWidth - padding, canvasHeight - footerHeight/2 + 20);
+        }
+        
+        // 转换为图片并下载
+        const dataUrl = mergedCanvas.toDataURL(`image/${format}`, format === 'jpeg' ? quality : undefined);
+        const downloadLink = document.createElement('a');
+        downloadLink.href = dataUrl;
+        
+        // 生成文件名
+        const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const timeStr = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+        let filename = `水质监测数据图表_${province}_${basin}_${station}_${month}`;
+        filename = filename.replace(/全部/g, 'ALL'); // 替换"全部"为"ALL"
+        downloadLink.download = `${filename}_${dateStr}_${timeStr}.${format}`;
+        
+        // 触发下载
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // 移除加载指示器
+        document.body.removeChild(loadingDiv);
+      } catch (error) {
+        console.error('导出图表时出错:', error);
+        alert('导出图表时出错: ' + error.message);
+        document.body.removeChild(loadingDiv);
+      }
+    }, 100);
+  }
+
   // ============= 导出数据功能 ===============
 
   /**
@@ -1912,6 +2394,12 @@
         populateExportProvinces(); // 加载省份数据
         exportModal.show();
       });
+    }
+
+    // 导出图表按钮事件
+    const exportChartsBtn = document.getElementById('export-charts-btn');
+    if (exportChartsBtn) {
+      exportChartsBtn.addEventListener('click', showExportChartsModal);
     }
 
     // 省份变更事件
