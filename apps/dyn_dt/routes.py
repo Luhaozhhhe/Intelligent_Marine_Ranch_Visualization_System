@@ -23,6 +23,8 @@ from sqlalchemy import and_
 from sqlalchemy import Integer, DateTime, String, Text
 from datetime import datetime
 
+import urllib.parse
+
 @blueprint.route('/dynamic-dt')
 def dynamic_dt():
     context = {
@@ -279,6 +281,37 @@ def update(aPath, id):
 
 @blueprint.route('/export/<aPath>', methods=['GET'])
 def export_csv(aPath):
+    # Check if this is a water quality export request
+    province = request.args.get('province')
+    basin = request.args.get('basin')
+    station = request.args.get('station')
+    month = request.args.get('month')
+    
+    if province and basin and station and month:
+        # This is a water quality data export
+        csv_path = os.path.join(WATER_QUALITY_BY_NAME, province, basin, station, month, f"{station}.csv")
+        if not os.path.exists(csv_path):
+            return 'Data file not found', 404
+        
+        try:
+            # Read the CSV file
+            with open(csv_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+                
+            # Prepare response with CSV content
+            response = make_response(content)
+            response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+            
+            # 修复中文文件名的问题 - 使用 URL 编码（RFC 5987）
+            filename = f"{station}_{month}.csv"
+            encoded_filename = urllib.parse.quote(filename)
+            response.headers['Content-Disposition'] = f"attachment; filename*=UTF-8''{encoded_filename}"
+            
+            return response
+        except Exception as e:
+            return f'Error reading file: {str(e)}', 500
+    
+    # If not a water quality export, use the original dynamic table export logic
     aModelName = None
     aModelClass = None
 
@@ -299,7 +332,6 @@ def export_csv(aPath):
             fields.append(field.key)
         else:
             print(f"Field {field.key} does not exist in {aModelClass} model.")
-
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -1173,3 +1205,88 @@ def search_water_stations():
         "total": len(results),
         "results": results
     })
+
+@blueprint.route('/api/water/upload', methods=['POST'])
+@login_required
+def upload_water_data():
+    """Upload water quality data in CSV format"""
+    if 'file' not in request.files:
+        return jsonify({"success": False, "error": "没有上传文件"}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"success": False, "error": "未选择文件"}), 400
+    
+    if not file.filename.endswith('.csv'):
+        return jsonify({"success": False, "error": "只支持CSV文件格式"}), 400
+    
+    # Get form data
+    province = request.form.get('province')
+    basin = request.form.get('basin')
+    station = request.form.get('station')
+    month = request.form.get('month')
+    
+    if not all([province, basin, station, month]):
+        return jsonify({"success": False, "error": "必须提供province、basin、station和month参数"}), 400
+    
+    # Check if the folder structure exists, create if not
+    station_folder = os.path.join(WATER_QUALITY_BY_NAME, province, basin, station)
+    if not os.path.exists(station_folder):
+        os.makedirs(station_folder, exist_ok=True)
+    
+    month_folder = os.path.join(station_folder, month)
+    if not os.path.exists(month_folder):
+        os.makedirs(month_folder, exist_ok=True)
+    
+    # Target path for saving the file
+    target_path = os.path.join(month_folder, f"{station}.csv")
+    
+    try:
+        # Save the file temporarily to validate format
+        temp_file_path = os.path.join(month_folder, "temp.csv")
+        file.save(temp_file_path)
+        
+        # Validate CSV format
+        try:
+            df = pd.read_csv(temp_file_path)
+            
+            # Check if required columns exist
+            required_columns = ['省份', '流域', '断面名称', '监测时间', '水质类别']
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            
+            if missing_columns:
+                os.remove(temp_file_path)
+                return jsonify({
+                    "success": False, 
+                    "error": f"CSV文件缺少必要的列: {', '.join(missing_columns)}"
+                }), 400
+            
+            # Rename the file
+            os.rename(temp_file_path, target_path)
+            
+            # Also save to time-based structure
+            time_based_folder = os.path.join(WATER_QUALITY_BY_TIME, month)
+            if not os.path.exists(time_based_folder):
+                os.makedirs(time_based_folder, exist_ok=True)
+            
+            time_based_path = os.path.join(time_based_folder, f"{province}_{basin}_{station}.csv")
+            df.to_csv(time_based_path, index=False)
+            
+            return jsonify({
+                "success": True,
+                "message": "数据上传成功",
+                "province": province,
+                "basin": basin,
+                "station": station,
+                "month": month,
+                "record_count": len(df)
+            })
+            
+        except Exception as e:
+            # Remove temp file if validation fails
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+            return jsonify({"success": False, "error": f"CSV文件格式无效: {str(e)}"}), 400
+    
+    except Exception as e:
+        return jsonify({"success": False, "error": f"上传文件时发生错误: {str(e)}"}), 500
