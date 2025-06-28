@@ -1139,6 +1139,80 @@
       });
   }
 
+  // 生成年度月度数据
+  function generateYearlyMonthlyData(predictions) {
+    const labels = [];
+    const countData = [];
+    const weightData = [];
+    const lengthData = [];
+    
+    // 季节性调整因子（模拟一年四季的变化）
+    const seasonalFactors = [
+      0.8,  // 1月 - 冬季低增长
+      0.9,  // 2月
+      1.1,  // 3月 - 春季开始增长
+      1.3,  // 4月 - 春季高增长
+      1.4,  // 5月 - 春季最佳
+      1.5,  // 6月 - 夏季开始
+      1.6,  // 7月 - 夏季最佳
+      1.5,  // 8月 - 夏季高增长
+      1.3,  // 9月 - 秋季
+      1.1,  // 10月 - 秋季减缓
+      0.9,  // 11月 - 准备过冬
+      0.8   // 12月 - 冬季
+    ];
+    
+    // 初始化当前值（第0个月 - 起始状态）
+    let currentCount = predictions.current.count;
+    let currentWeight = predictions.current.weight;
+    let currentLength = predictions.current.length;
+    
+    // 添加起始月份数据
+    labels.push('当前');
+    countData.push(Math.round(currentCount));
+    weightData.push(parseFloat(currentWeight.toFixed(2)));
+    lengthData.push(parseFloat(currentLength.toFixed(2)));
+    
+    // 计算未来12个月的累积增长
+    for (let month = 1; month <= 12; month++) {
+      labels.push(`${month}月后`);
+      
+      // 计算本月的增长率
+      const seasonalFactor = seasonalFactors[month - 1];
+      const baseGrowthRate = 0.08; // 基础月增长率8%
+      const environmentVariation = 0.95 + Math.random() * 0.1; // 环境变化 95%-105%
+      
+      // 针对不同指标应用不同的增长策略
+      
+      // 鱼群数量：基于繁殖和生存率
+      const reproductionRate = month >= 4 && month <= 8 ? 1.2 : 0.9; // 繁殖季节增长更快
+      const survivalRate = seasonalFactor; // 季节影响生存率
+      const countGrowthRate = predictions.rates.count * baseGrowthRate * reproductionRate * survivalRate * environmentVariation;
+      currentCount *= (1 + countGrowthRate);
+      
+      // 体重：稳定增长，受季节和食物影响
+      const feedingEfficiency = seasonalFactor; // 季节影响食物获取
+      const weightGrowthRate = predictions.rates.weight * baseGrowthRate * feedingEfficiency * environmentVariation;
+      currentWeight *= (1 + weightGrowthRate);
+      
+      // 体长：较稳定的增长
+      const lengthGrowthRate = predictions.rates.length * baseGrowthRate * seasonalFactor * environmentVariation;
+      currentLength *= (1 + lengthGrowthRate);
+      
+      // 添加到数据数组
+      countData.push(Math.round(currentCount));
+      weightData.push(parseFloat(currentWeight.toFixed(2)));
+      lengthData.push(parseFloat(currentLength.toFixed(2)));
+    }
+    
+    return {
+      labels: labels,
+      countData: countData,
+      weightData: weightData,
+      lengthData: lengthData
+    };
+  }
+
   // 生成年度预测数据
   function generateYearlyPrediction(predictions) {
     console.log('生成年度预测数据...', predictions);
@@ -1174,62 +1248,6 @@
     // 更新预测说明
     const explanation = `年度预测基于${predictions.species}的季节性生长模式，预期年增长率${formatNumber(yearGrowthRate)}%，最佳增长期为${maxGrowthPeriod}。预测考虑了温度、食物供应和繁殖周期等因素。`;
     document.getElementById('prediction-explanation').textContent = explanation;
-  }
-
-  // 生成年度月度数据
-  function generateYearlyMonthlyData(predictions) {
-    const labels = [];
-    const countData = [];
-    const weightData = [];
-    const lengthData = [];
-    
-    // 季节性调整因子（模拟一年四季的变化）
-    const seasonalFactors = [
-      0.8,  // 1月 - 冬季低增长
-      0.9,  // 2月
-      1.1,  // 3月 - 春季开始增长
-      1.3,  // 4月 - 春季高增长
-      1.4,  // 5月 - 春季最佳
-      1.5,  // 6月 - 夏季开始
-      1.6,  // 7月 - 夏季最佳
-      1.5,  // 8月 - 夏季高增长
-      1.3,  // 9月 - 秋季
-      1.1,  // 10月 - 秋季减缓
-      0.9,  // 11月 - 准备过冬
-      0.8   // 12月 - 冬季
-    ];
-    
-    let currentCount = predictions.current.count;
-    let currentWeight = predictions.current.weight;
-    let currentLength = predictions.current.length;
-    
-    for (let month = 1; month <= 12; month++) {
-      labels.push(`${month}月`);
-      
-      // 应用季节性和基础增长率
-      const monthlyGrowthFactor = seasonalFactors[month - 1] * 0.1; // 基础月增长率
-      const environmentVariation = 0.95 + Math.random() * 0.1; // 环境变化
-      
-      // 计算当月增长
-      const countGrowth = currentCount * predictions.rates.count * monthlyGrowthFactor * environmentVariation;
-      const weightGrowth = currentWeight * predictions.rates.weight * monthlyGrowthFactor * environmentVariation;
-      const lengthGrowth = currentLength * predictions.rates.length * monthlyGrowthFactor * environmentVariation;
-      
-      currentCount += countGrowth;
-      currentWeight += weightGrowth;
-      currentLength += lengthGrowth;
-      
-      countData.push(Math.round(currentCount));
-      weightData.push(parseFloat(currentWeight.toFixed(2)));
-      lengthData.push(parseFloat(currentLength.toFixed(2)));
-    }
-    
-    return {
-      labels: labels,
-      countData: countData,
-      weightData: weightData,
-      lengthData: lengthData
-    };
   }
 
   // 显示月度预测结果
@@ -1274,6 +1292,7 @@
     const labels = [];
     const countData = [];
     const weightData = [];
+    const lengthData = [];
     
     for (let i = 0; i <= 30; i += 5) {
       labels.push(i === 0 ? '当前' : `${i}天后`);
@@ -1282,9 +1301,11 @@
       const factor = i / 30;
       const count = predictions.current.count + (predictions.predicted.count - predictions.current.count) * factor;
       const weight = predictions.current.weight + (predictions.predicted.weight - predictions.current.weight) * factor;
+      const length = predictions.current.length + (predictions.predicted.length - predictions.current.length) * factor;
       
       countData.push(Math.round(count));
       weightData.push(parseFloat(weight.toFixed(2)));
+      lengthData.push(parseFloat(length.toFixed(2)));
     }
 
     predictionChart = new Chart(ctx, {
@@ -1292,7 +1313,7 @@
       data: {
         labels: labels,
         datasets: [{
-          label: '鱼群数量',
+          label: '鱼群数量(尾)',
           data: countData,
           borderColor: 'rgba(45, 206, 137, 1)',
           backgroundColor: 'rgba(45, 206, 137, 0.1)',
@@ -1307,6 +1328,17 @@
           data: weightData,
           borderColor: 'rgba(94, 114, 228, 1)',
           backgroundColor: 'rgba(94, 114, 228, 0.1)',
+          borderWidth: 3,
+          fill: false,
+          tension: 0.4,
+          yAxisID: 'y1',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        }, {
+          label: '平均体长(cm)',
+          data: lengthData,
+          borderColor: 'rgba(255, 159, 64, 1)',
+          backgroundColor: 'rgba(255, 159, 64, 0.1)',
           borderWidth: 3,
           fill: false,
           tension: 0.4,
@@ -1345,7 +1377,7 @@
             position: 'left',
             title: {
               display: true,
-              text: '数量(尾)',
+              text: '鱼群数量(尾)',
               font: {
                 size: 14,
                 weight: 'bold'
@@ -1363,7 +1395,7 @@
             position: 'right',
             title: {
               display: true,
-              text: '体重(g)',
+              text: '体重(g) / 体长(cm)',
               font: {
                 size: 14,
                 weight: 'bold'
