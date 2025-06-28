@@ -4,6 +4,170 @@
 
 {% block stylesheets %}
 <link href="{{ url_for('static', filename='assets/css/data-analysis.css') }}" rel="stylesheet" />
+<style>
+/* 报警与通知模块样式 */
+.alert-card {
+    border-left: 4px solid #dc3545;
+    transition: all 0.3s ease;
+}
+
+.alert-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.15);
+}
+
+.alert-normal {
+    border-left-color: #28a745;
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+}
+
+.alert-critical {
+    border-left-color: #6f42c1;
+}
+
+.alert-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+}
+
+.alert-indicator.normal { background-color: #28a745; }
+.alert-indicator.warning { background-color: #ffc107; }
+.alert-indicator.danger { background-color: #dc3545; }
+.alert-indicator.critical { background-color: #6f42c1; }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.notification-item {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border-left: 4px solid #e9ecef;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.notification-item:hover {
+    background-color: #e9ecef;
+}
+
+.notification-item.unread {
+    background-color: #fff3cd;
+    border-left-color: #ffc107;
+}
+
+.notification-item.critical {
+    background-color: #f8d7da;
+    border-left-color: #dc3545;
+}
+
+.parameter-threshold {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #e9ecef;
+}
+
+.parameter-threshold:hover {
+    background-color: #e9ecef;
+}
+
+.threshold-input {
+    max-width: 120px;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.real-time-monitor {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.monitor-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.monitor-unit {
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+.alert-settings-panel {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.settings-toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.settings-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+</style>
 {% endblock stylesheets %}
 
 {% block content %}
@@ -32,6 +196,202 @@
                                     </button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 报警与通知模块 -->
+        <div class="row mb-4">
+            <!-- 实时监控面板 -->
+            <div class="col-lg-8 mb-4">
+                <div class="card alert-card">
+                    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            实时监控与报警
+                        </h6>
+                        <div class="d-flex align-items-center">
+                            <span class="alert-indicator normal me-2"></span>
+                            <span class="text-sm">系统正常</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="real-time-monitor">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="monitor-item">
+                                        <i class="fas fa-thermometer-half fa-2x mb-2"></i>
+                                        <div class="monitor-value" id="temp-value">24.5</div>
+                                        <div class="monitor-unit">°C</div>
+                                        <div class="text-sm">水温</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="monitor-item">
+                                        <i class="fas fa-wind fa-2x mb-2"></i>
+                                        <div class="monitor-value" id="oxygen-value">7.2</div>
+                                        <div class="monitor-unit">mg/L</div>
+                                        <div class="text-sm">溶解氧</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="monitor-item">
+                                        <i class="fas fa-flask fa-2x mb-2"></i>
+                                        <div class="monitor-value" id="ph-value">7.8</div>
+                                        <div class="monitor-unit">pH</div>
+                                        <div class="text-sm">酸碱度</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="monitor-item">
+                                        <i class="fas fa-tint fa-2x mb-2"></i>
+                                        <div class="monitor-value" id="turbidity-value">2.1</div>
+                                        <div class="monitor-unit">NTU</div>
+                                        <div class="text-sm">浊度</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 当前报警状态 -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h6 class="text-uppercase text-muted text-sm font-weight-bolder mb-3">当前报警状态</h6>
+                                <div id="current-alerts">
+                                    <!-- 动态加载报警信息 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 报警设置面板 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6 class="mb-0">
+                            <i class="fas fa-cog text-primary me-2"></i>
+                            报警设置
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert-settings-panel">
+                            <!-- 全局开关 -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-sm font-weight-bold">报警系统</span>
+                                <label class="settings-toggle">
+                                    <input type="checkbox" id="alert-system-toggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <!-- 参数阈值设置 -->
+                            <h6 class="text-uppercase text-muted text-sm font-weight-bolder mb-3">参数阈值设置</h6>
+                            
+                            <!-- 水温阈值 -->
+                            <div class="parameter-threshold">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-sm font-weight-bold">水温 (°C)</span>
+                                    <span class="status-badge bg-success">正常</span>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="text-xs text-muted">最小值</label>
+                                        <input type="number" class="form-control form-control-sm threshold-input" id="temp-min" value="18" step="0.1">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="text-xs text-muted">最大值</label>
+                                        <input type="number" class="form-control form-control-sm threshold-input" id="temp-max" value="30" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 溶解氧阈值 -->
+                            <div class="parameter-threshold">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-sm font-weight-bold">溶解氧 (mg/L)</span>
+                                    <span class="status-badge bg-success">正常</span>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="text-xs text-muted">最小值</label>
+                                        <input type="number" class="form-control form-control-sm threshold-input" id="oxygen-min" value="5.0" step="0.1">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="text-xs text-muted">最大值</label>
+                                        <input type="number" class="form-control form-control-sm threshold-input" id="oxygen-max" value="12.0" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- pH阈值 -->
+                            <div class="parameter-threshold">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-sm font-weight-bold">pH值</span>
+                                    <span class="status-badge bg-success">正常</span>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="text-xs text-muted">最小值</label>
+                                        <input type="number" class="form-control form-control-sm threshold-input" id="ph-min" value="6.5" step="0.1">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="text-xs text-muted">最大值</label>
+                                        <input type="number" class="form-control form-control-sm threshold-input" id="ph-max" value="8.5" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 浊度阈值 -->
+                            <div class="parameter-threshold">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-sm font-weight-bold">浊度 (NTU)</span>
+                                    <span class="status-badge bg-success">正常</span>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="text-xs text-muted">最小值</label>
+                                        <input type="number" class="form-control form-control-sm threshold-input" id="turbidity-min" value="0" step="0.1">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="text-xs text-muted">最大值</label>
+                                        <input type="number" class="form-control form-control-sm threshold-input" id="turbidity-max" value="5.0" step="0.1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 保存设置按钮 -->
+                            <button class="btn btn-primary btn-sm w-100 mt-3" id="save-settings">
+                                <i class="fas fa-save me-2"></i>保存设置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 通知历史 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-bell text-info me-2"></i>
+                            通知历史
+                        </h6>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-primary active" data-filter="all">全部</button>
+                            <button type="button" class="btn btn-outline-warning" data-filter="warning">警告</button>
+                            <button type="button" class="btn btn-outline-danger" data-filter="danger">危险</button>
+                            <button type="button" class="btn btn-outline-secondary" data-filter="info">信息</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="notification-history">
+                            <!-- 动态加载通知历史 -->
                         </div>
                     </div>
                 </div>
@@ -137,6 +497,369 @@
 {% block javascripts %}
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
+// 报警与通知模块功能
+class AlertNotificationSystem {
+    constructor() {
+        this.alertSettings = {
+            enabled: true,
+            thresholds: {
+                temperature: { min: 18, max: 30 },
+                oxygen: { min: 5.0, max: 12.0 },
+                ph: { min: 6.5, max: 8.5 },
+                turbidity: { min: 0, max: 5.0 }
+            }
+        };
+        this.currentAlerts = [];
+        this.notificationHistory = [];
+        this.monitoringInterval = null;
+        this.init();
+    }
+
+    init() {
+        this.loadSettings();
+        this.startMonitoring();
+        this.loadNotificationHistory();
+        this.bindEvents();
+    }
+
+    loadSettings() {
+        const savedSettings = localStorage.getItem('alertSettings');
+        if (savedSettings) {
+            this.alertSettings = JSON.parse(savedSettings);
+        }
+        this.updateSettingsUI();
+    }
+
+    saveSettings() {
+        // 从UI获取设置
+        this.alertSettings.enabled = document.getElementById('alert-system-toggle').checked;
+        this.alertSettings.thresholds.temperature.min = parseFloat(document.getElementById('temp-min').value);
+        this.alertSettings.thresholds.temperature.max = parseFloat(document.getElementById('temp-max').value);
+        this.alertSettings.thresholds.oxygen.min = parseFloat(document.getElementById('oxygen-min').value);
+        this.alertSettings.thresholds.oxygen.max = parseFloat(document.getElementById('oxygen-max').value);
+        this.alertSettings.thresholds.ph.min = parseFloat(document.getElementById('ph-min').value);
+        this.alertSettings.thresholds.ph.max = parseFloat(document.getElementById('ph-max').value);
+        this.alertSettings.thresholds.turbidity.min = parseFloat(document.getElementById('turbidity-min').value);
+        this.alertSettings.thresholds.turbidity.max = parseFloat(document.getElementById('turbidity-max').value);
+
+        localStorage.setItem('alertSettings', JSON.stringify(this.alertSettings));
+        this.showNotification('设置已保存', 'success');
+    }
+
+    updateSettingsUI() {
+        document.getElementById('alert-system-toggle').checked = this.alertSettings.enabled;
+        document.getElementById('temp-min').value = this.alertSettings.thresholds.temperature.min;
+        document.getElementById('temp-max').value = this.alertSettings.thresholds.temperature.max;
+        document.getElementById('oxygen-min').value = this.alertSettings.thresholds.oxygen.min;
+        document.getElementById('oxygen-max').value = this.alertSettings.thresholds.oxygen.max;
+        document.getElementById('ph-min').value = this.alertSettings.thresholds.ph.min;
+        document.getElementById('ph-max').value = this.alertSettings.thresholds.ph.max;
+        document.getElementById('turbidity-min').value = this.alertSettings.thresholds.turbidity.min;
+        document.getElementById('turbidity-max').value = this.alertSettings.thresholds.turbidity.max;
+    }
+
+    startMonitoring() {
+        if (this.monitoringInterval) {
+            clearInterval(this.monitoringInterval);
+        }
+
+        this.monitoringInterval = setInterval(() => {
+            this.updateRealTimeData();
+            this.checkAlerts();
+        }, 5000); // 每5秒更新一次
+    }
+
+    updateRealTimeData() {
+        // 模拟实时数据更新
+        const tempValue = 20 + Math.random() * 15; // 20-35°C
+        const oxygenValue = 4 + Math.random() * 8; // 4-12 mg/L
+        const phValue = 6 + Math.random() * 3; // 6-9 pH
+        const turbidityValue = Math.random() * 6; // 0-6 NTU
+
+        document.getElementById('temp-value').textContent = tempValue.toFixed(1);
+        document.getElementById('oxygen-value').textContent = oxygenValue.toFixed(1);
+        document.getElementById('ph-value').textContent = phValue.toFixed(1);
+        document.getElementById('turbidity-value').textContent = turbidityValue.toFixed(1);
+
+        // 检查是否触发报警
+        this.checkParameterAlert('temperature', tempValue);
+        this.checkParameterAlert('oxygen', oxygenValue);
+        this.checkParameterAlert('ph', phValue);
+        this.checkParameterAlert('turbidity', turbidityValue);
+    }
+
+    checkParameterAlert(parameter, value) {
+        const threshold = this.alertSettings.thresholds[parameter];
+        let alertLevel = 'normal';
+        let message = '';
+
+        if (value < threshold.min) {
+            alertLevel = value < threshold.min * 0.8 ? 'critical' : 'warning';
+            message = `${this.getParameterName(parameter)}过低: ${value}${this.getParameterUnit(parameter)}`;
+        } else if (value > threshold.max) {
+            alertLevel = value > threshold.max * 1.2 ? 'critical' : 'warning';
+            message = `${this.getParameterName(parameter)}过高: ${value}${this.getParameterUnit(parameter)}`;
+        }
+
+        if (alertLevel !== 'normal') {
+            this.triggerAlert(parameter, alertLevel, message, value);
+        }
+
+        // 更新参数状态显示
+        this.updateParameterStatus(parameter, alertLevel);
+    }
+
+    getParameterName(parameter) {
+        const names = {
+            temperature: '水温',
+            oxygen: '溶解氧',
+            ph: 'pH值',
+            turbidity: '浊度'
+        };
+        return names[parameter] || parameter;
+    }
+
+    getParameterUnit(parameter) {
+        const units = {
+            temperature: '°C',
+            oxygen: ' mg/L',
+            ph: '',
+            turbidity: ' NTU'
+        };
+        return units[parameter] || '';
+    }
+
+    updateParameterStatus(parameter, status) {
+        const statusElement = document.querySelector(`#${parameter}-min`).closest('.parameter-threshold').querySelector('.status-badge');
+        statusElement.className = `status-badge bg-${this.getStatusColor(status)}`;
+        statusElement.textContent = this.getStatusText(status);
+    }
+
+    getStatusColor(status) {
+        const colors = {
+            normal: 'success',
+            warning: 'warning',
+            danger: 'danger',
+            critical: 'danger'
+        };
+        return colors[status] || 'secondary';
+    }
+
+    getStatusText(status) {
+        const texts = {
+            normal: '正常',
+            warning: '警告',
+            danger: '危险',
+            critical: '严重'
+        };
+        return texts[status] || '未知';
+    }
+
+    triggerAlert(parameter, level, message, value) {
+        const alert = {
+            id: Date.now(),
+            parameter: parameter,
+            level: level,
+            message: message,
+            value: value,
+            timestamp: new Date(),
+            acknowledged: false
+        };
+
+        this.currentAlerts.push(alert);
+        this.addNotification(alert);
+        this.updateCurrentAlerts();
+        this.showAlertNotification(alert);
+    }
+
+    showAlertNotification(alert) {
+        if (!this.alertSettings.enabled) return;
+
+        const levelColors = {
+            warning: '#ffc107',
+            danger: '#dc3545',
+            critical: '#6f42c1'
+        };
+
+        // 创建浏览器通知
+        if (Notification.permission === 'granted') {
+            new Notification('水质监测报警', {
+                body: alert.message,
+                icon: '/static/assets/img/logo.png',
+                tag: alert.id
+            });
+        }
+
+        // 显示页面内通知
+        this.showToast(alert.message, alert.level);
+    }
+
+    showToast(message, level = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${level === 'critical' ? 'danger' : level} alert-dismissible fade show position-fixed`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        toast.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 5000);
+    }
+
+    updateCurrentAlerts() {
+        const container = document.getElementById('current-alerts');
+        container.innerHTML = '';
+
+        if (this.currentAlerts.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted">暂无报警</div>';
+            return;
+        }
+
+        this.currentAlerts.forEach(alert => {
+            const alertElement = document.createElement('div');
+            alertElement.className = `alert alert-${alert.level === 'critical' ? 'danger' : alert.level} alert-sm d-flex justify-content-between align-items-center`;
+            alertElement.innerHTML = `
+                <div>
+                    <strong>${this.getParameterName(alert.parameter)}</strong>: ${alert.message}
+                    <br><small class="text-muted">${alert.timestamp.toLocaleString()}</small>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="alertSystem.acknowledgeAlert(${alert.id})">
+                    确认
+                </button>
+            `;
+            container.appendChild(alertElement);
+        });
+    }
+
+    acknowledgeAlert(alertId) {
+        const alert = this.currentAlerts.find(a => a.id === alertId);
+        if (alert) {
+            alert.acknowledged = true;
+            this.currentAlerts = this.currentAlerts.filter(a => a.id !== alertId);
+            this.updateCurrentAlerts();
+        }
+    }
+
+    addNotification(alert) {
+        const notification = {
+            id: alert.id,
+            type: alert.level,
+            message: alert.message,
+            timestamp: alert.timestamp,
+            read: false
+        };
+
+        this.notificationHistory.unshift(notification);
+        if (this.notificationHistory.length > 100) {
+            this.notificationHistory = this.notificationHistory.slice(0, 100);
+        }
+
+        this.updateNotificationHistory();
+    }
+
+    loadNotificationHistory() {
+        const savedHistory = localStorage.getItem('notificationHistory');
+        if (savedHistory) {
+            this.notificationHistory = JSON.parse(savedHistory).map(n => ({
+                ...n,
+                timestamp: new Date(n.timestamp)
+            }));
+        }
+        this.updateNotificationHistory();
+    }
+
+    updateNotificationHistory() {
+        const container = document.getElementById('notification-history');
+        const filter = document.querySelector('.btn-group .btn.active').dataset.filter;
+        
+        let filteredNotifications = this.notificationHistory;
+        if (filter !== 'all') {
+            filteredNotifications = this.notificationHistory.filter(n => n.type === filter);
+        }
+
+        if (filteredNotifications.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted">暂无通知</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        filteredNotifications.forEach(notification => {
+            const notificationElement = document.createElement('div');
+            notificationElement.className = `notification-item ${notification.read ? '' : 'unread'} ${notification.type === 'critical' ? 'critical' : ''}`;
+            notificationElement.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="alert-indicator ${notification.type}"></span>
+                            <strong>${this.getNotificationTitle(notification.type)}</strong>
+                        </div>
+                        <p class="mb-1">${notification.message}</p>
+                        <small class="text-muted">${notification.timestamp.toLocaleString()}</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="alertSystem.markAsRead(${notification.id})">
+                        ${notification.read ? '已读' : '标记已读'}
+                    </button>
+                </div>
+            `;
+            container.appendChild(notificationElement);
+        });
+
+        // 保存到本地存储
+        localStorage.setItem('notificationHistory', JSON.stringify(this.notificationHistory));
+    }
+
+    getNotificationTitle(type) {
+        const titles = {
+            warning: '警告通知',
+            danger: '危险通知',
+            critical: '严重报警',
+            info: '信息通知'
+        };
+        return titles[type] || '通知';
+    }
+
+    markAsRead(notificationId) {
+        const notification = this.notificationHistory.find(n => n.id === notificationId);
+        if (notification) {
+            notification.read = true;
+            this.updateNotificationHistory();
+        }
+    }
+
+    showNotification(message, type = 'info') {
+        this.showToast(message, type);
+    }
+
+    bindEvents() {
+        // 保存设置按钮
+        document.getElementById('save-settings').addEventListener('click', () => {
+            this.saveSettings();
+        });
+
+        // 通知过滤按钮
+        document.querySelectorAll('.btn-group .btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.updateNotificationHistory();
+            });
+        });
+
+        // 请求通知权限
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    }
+}
+
+// 初始化报警系统
+let alertSystem;
+
 // Fish Size Distribution Chart
 var fishSizeOptions = {
     series: [{
@@ -198,6 +921,11 @@ document.getElementById('searchButton').addEventListener('click', function() {
     var searchValue = document.getElementById('searchInput').value;
     // Implement search logic here
     console.log('Searching for:', searchValue);
+});
+
+// 页面加载完成后初始化报警系统
+document.addEventListener('DOMContentLoaded', function() {
+    alertSystem = new AlertNotificationSystem();
 });
 </script>
 {% endblock javascripts %}
