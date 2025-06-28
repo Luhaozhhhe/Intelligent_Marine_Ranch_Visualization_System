@@ -366,7 +366,7 @@
                 <!-- 年度预测摘要 -->
                 <div id="yearly-prediction-summary" style="display: none;">
                   <div class="prediction-card mb-3">
-                    <h6 class="text-dark text-sm font-weight-bold mb-3">年度预测摘要</h6>
+                    <h6 class="text-xs text-dark text-sm font-weight-bold mb-3">年度预测摘要</h6>
                     <div class="mb-2">
                       <div class="d-flex justify-content-between">
                         <span class="text-xs text-dark">年末预期数量</span>
@@ -429,6 +429,99 @@
                 <div id="chart-placeholder" class="text-center" style="padding: 150px 0;">
                   <i class="fas fa-chart-line text-muted" style="font-size: 4rem;"></i>
                   <p class="text-muted mt-3 mb-0" style="font-size: 1.2rem;">选择鱼类并生成预测后，图表将在此显示</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 水下视频识别 - 添加间距并放在预测分析下方 -->
+    <div class="row mt-5">
+      <div class="col-12 mb-4">
+        <div class="card h-100">
+          <div class="card-header pb-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">水下视频识别</h6>
+              <div>
+                <span class="badge bg-primary">实时识别</span>
+                <span class="badge bg-success">AI分析</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <!-- 左侧控制区域 -->
+              <div class="col-md-3">
+                <!-- 视频控制 -->
+                <div class="mb-3">
+                  <label class="form-label text-sm font-weight-bold">视频控制</label>
+                  <div class="d-flex flex-column gap-2">
+                    <button class="btn btn-primary btn-sm" id="play-video-btn" onclick="playVideo()">
+                      <i class="fas fa-play me-2"></i>播放视频
+                    </button>
+                    <button class="btn btn-secondary btn-sm" id="pause-video-btn" onclick="pauseVideo()">
+                      <i class="fas fa-pause me-2"></i>暂停视频
+                    </button>
+                    <button class="btn btn-info btn-sm" id="restart-video-btn" onclick="restartVideo()">
+                      <i class="fas fa-redo me-2"></i>重新播放
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 识别设置 -->
+                <div class="mt-3 p-2 bg-light rounded">
+                  <p class="text-xs text-muted mb-1">
+                    <i class="fas fa-cog me-1"></i>识别设置
+                  </p>
+                  <div class="mb-2">
+                    <label class="text-xs text-muted">识别频率</label>
+                    <select class="form-control form-control-sm" id="recognition-frequency">
+                      <option value="1">每秒识别1次</option>
+                      <option value="2" selected>每秒识别2次</option>
+                      <option value="5">每秒识别5次</option>
+                    </select>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="show-bounding-boxes" checked>
+                    <label class="form-check-label text-xs" for="show-bounding-boxes">
+                      显示识别框
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 右侧视频区域 -->
+              <div class="col-md-9">
+                <div class="video-container">
+                  <h6 class="text-sm font-weight-bold mb-3">水下鱼类实时识别</h6>
+                  <div class="position-relative">
+                    <video 
+                      id="underwater-video" 
+                      class="w-100 rounded" 
+                      style="height: 450px; object-fit: cover; background-color: #000;"
+                      controls
+                      preload="metadata">
+                      <source src="{{ url_for('static', filename='assets/media/fish/fishexample.mp4') }}" type="video/mp4">
+                      您的浏览器不支持视频播放。
+                    </video>
+                    
+                    <!-- 识别结果覆盖层 -->
+                    <div id="recognition-overlay" class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none">
+                      <!-- 识别框将通过JavaScript动态添加 -->
+                    </div>
+                    
+                    <!-- 实时信息显示 -->
+                    <div class="position-absolute top-0 end-0 m-2">
+                      <div class="bg-dark bg-opacity-75 text-white p-2 rounded">
+                        <div class="text-xs">
+                          <i class="fas fa-eye me-1"></i>实时识别中...
+                        </div>
+                        <div class="text-xs" id="fps-counter">FPS: --</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1252,32 +1345,81 @@
 
   // 显示月度预测结果
   function displayPredictionResults(predictions) {
+    // 计算与月度图表一致的30天后预测值
+    const monthlyChartPredictions = calculateMonthlyChartEndValues(predictions);
+    
     // 更新数量预测
     document.getElementById('current-count').textContent = predictions.current.count + ' 尾';
-    document.getElementById('predicted-count').textContent = predictions.predicted.count + ' 尾';
+    document.getElementById('predicted-count').textContent = monthlyChartPredictions.count + ' 尾';
     
-    const countProgress = (predictions.predicted.count / Math.max(predictions.current.count, predictions.predicted.count)) * 100;
+    const countProgress = (monthlyChartPredictions.count / Math.max(predictions.current.count, monthlyChartPredictions.count)) * 100;
     document.getElementById('count-progress').style.width = countProgress + '%';
 
     // 更新体重预测
     document.getElementById('current-weight').textContent = formatNumber(predictions.current.weight) + ' g';
-    document.getElementById('predicted-weight').textContent = formatNumber(predictions.predicted.weight) + ' g';
+    document.getElementById('predicted-weight').textContent = formatNumber(monthlyChartPredictions.weight) + ' g';
     
-    const weightProgress = (predictions.predicted.weight / Math.max(predictions.current.weight, predictions.predicted.weight)) * 100;
+    const weightProgress = (monthlyChartPredictions.weight / Math.max(predictions.current.weight, monthlyChartPredictions.weight)) * 100;
     document.getElementById('weight-progress').style.width = weightProgress + '%';
 
     // 更新体长预测
     document.getElementById('current-length').textContent = formatNumber(predictions.current.length) + ' cm';
-    document.getElementById('predicted-length').textContent = formatNumber(predictions.predicted.length) + ' cm';
+    document.getElementById('predicted-length').textContent = formatNumber(monthlyChartPredictions.length) + ' cm';
     
-    const lengthProgress = (predictions.predicted.length / Math.max(predictions.current.length, predictions.predicted.length)) * 100;
+    const lengthProgress = (monthlyChartPredictions.length / Math.max(predictions.current.length, monthlyChartPredictions.length)) * 100;
     document.getElementById('length-progress').style.width = lengthProgress + '%';
+
+    // 计算增长率
+    const countGrowth = ((monthlyChartPredictions.count - predictions.current.count) / predictions.current.count * 100);
+    const weightGrowth = ((monthlyChartPredictions.weight - predictions.current.weight) / predictions.current.weight * 100);
+    const lengthGrowth = ((monthlyChartPredictions.length - predictions.current.length) / predictions.current.length * 100);
 
     // 更新预测说明
     const explanation = `基于${predictions.species}的生长特性，考虑季节因子(${formatNumber(predictions.factors.seasonal)})和环境因子(${formatNumber(predictions.factors.environment)})。
-    数量预测增长${formatNumber(predictions.growth.count)}%，体重增长${formatNumber(predictions.growth.weight)}%，体长增长${formatNumber(predictions.growth.length)}%。`;
+    30天后预测：数量增长${formatNumber(countGrowth)}%，体重增长${formatNumber(weightGrowth)}%，体长增长${formatNumber(lengthGrowth)}%。`;
     
     document.getElementById('prediction-explanation').textContent = explanation;
+  }
+
+  // 计算与月度图表一致的30天后预测值
+  function calculateMonthlyChartEndValues(predictions) {
+    // 使用与createMonthlyChart相同的算法计算30天后的值
+    let currentCount = predictions.current.count;
+    let currentWeight = predictions.current.weight;
+    let currentLength = predictions.current.length;
+    
+    // 当前季节因子（假设当前是春季）
+    const seasonalFactor = 1.3; // 春季增长因子
+    const baseGrowthRate = 0.08; // 基础月增长率8%
+    
+    // 模拟30天的累积增长
+    for (let day = 1; day <= 30; day++) {
+      // 计算每日增长（月增长率/30天）
+      const dailyGrowthFactor = (baseGrowthRate * seasonalFactor) / 30;
+      
+      // 添加日间波动（模拟真实的日常变化）
+      const dailyVariation = 0.98 + Math.random() * 0.04; // ±2%的随机波动
+      
+      // 鱼群数量：考虑繁殖和日常活动
+      const reproductionRate = day >= 15 && day <= 25 ? 1.1 : 1.0; // 中期繁殖高峰
+      const countGrowthRate = predictions.rates.count * dailyGrowthFactor * reproductionRate * dailyVariation;
+      currentCount *= (1 + countGrowthRate);
+      
+      // 体重：稳定增长，受喂食周期影响
+      const feedingCycle = 1 + 0.05 * Math.sin(day * Math.PI / 7); // 7天喂食周期波动
+      const weightGrowthRate = predictions.rates.weight * dailyGrowthFactor * feedingCycle * dailyVariation;
+      currentWeight *= (1 + weightGrowthRate);
+      
+      // 体长：最稳定的增长
+      const lengthGrowthRate = predictions.rates.length * dailyGrowthFactor * dailyVariation;
+      currentLength *= (1 + lengthGrowthRate);
+    }
+    
+    return {
+      count: Math.round(currentCount),
+      weight: parseFloat(currentWeight.toFixed(2)),
+      length: parseFloat(currentLength.toFixed(2))
+    };
   }
 
   // 创建月度预测图表
@@ -1288,24 +1430,55 @@
 
     const ctx = document.getElementById('prediction-trend-chart').getContext('2d');
 
-    // 生成未来30天的预测趋势
+    // 生成未来30天的详细预测趋势（模拟年度预测中一个月的变化）
     const labels = [];
     const countData = [];
     const weightData = [];
     const lengthData = [];
     
-    for (let i = 0; i <= 30; i += 5) {
-      labels.push(i === 0 ? '当前' : `${i}天后`);
+    // 初始值
+    let currentCount = predictions.current.count;
+    let currentWeight = predictions.current.weight;
+    let currentLength = predictions.current.length;
+    
+    // 当前季节因子（假设当前是春季）
+    const seasonalFactor = 1.3; // 春季增长因子
+    const baseGrowthRate = 0.08; // 基础月增长率8%
+    
+    // 生成30天的每日数据
+    for (let day = 0; day <= 30; day += 2) { // 每2天一个数据点
+      labels.push(day === 0 ? '当前' : `第${day}天`);
       
-      // 线性插值计算中间值
-      const factor = i / 30;
-      const count = predictions.current.count + (predictions.predicted.count - predictions.current.count) * factor;
-      const weight = predictions.current.weight + (predictions.predicted.weight - predictions.current.weight) * factor;
-      const length = predictions.current.length + (predictions.predicted.length - predictions.current.length) * factor;
-      
-      countData.push(Math.round(count));
-      weightData.push(parseFloat(weight.toFixed(2)));
-      lengthData.push(parseFloat(length.toFixed(2)));
+      if (day === 0) {
+        // 初始数据
+        countData.push(Math.round(currentCount));
+        weightData.push(parseFloat(currentWeight.toFixed(2)));
+        lengthData.push(parseFloat(currentLength.toFixed(2)));
+      } else {
+        // 计算每日增长（月增长率/30天）
+        const dailyGrowthFactor = (baseGrowthRate * seasonalFactor) / 30;
+        
+        // 添加日间波动（模拟真实的日常变化）
+        const dailyVariation = 0.98 + Math.random() * 0.04; // ±2%的随机波动
+        
+        // 鱼群数量：考虑繁殖和日常活动
+        const reproductionRate = day >= 15 && day <= 25 ? 1.1 : 1.0; // 中期繁殖高峰
+        const countGrowthRate = predictions.rates.count * dailyGrowthFactor * reproductionRate * dailyVariation;
+        currentCount *= (1 + countGrowthRate);
+        
+        // 体重：稳定增长，受喂食周期影响
+        const feedingCycle = 1 + 0.05 * Math.sin(day * Math.PI / 7); // 7天喂食周期波动
+        const weightGrowthRate = predictions.rates.weight * dailyGrowthFactor * feedingCycle * dailyVariation;
+        currentWeight *= (1 + weightGrowthRate);
+        
+        // 体长：最稳定的增长
+        const lengthGrowthRate = predictions.rates.length * dailyGrowthFactor * dailyVariation;
+        currentLength *= (1 + lengthGrowthRate);
+        
+        countData.push(Math.round(currentCount));
+        weightData.push(parseFloat(currentWeight.toFixed(2)));
+        lengthData.push(parseFloat(currentLength.toFixed(2)));
+      }
     }
 
     predictionChart = new Chart(ctx, {
@@ -1583,6 +1756,42 @@
     });
     
     console.log('年度图表创建完成');
+  }
+
+  // ============= 水下视频识别功能 ===============
+
+  // 视频控制函数
+  function playVideo() {
+    const video = document.getElementById('underwater-video');
+    if (video) {
+      video.play().then(() => {
+        console.log('视频开始播放');
+      }).catch(error => {
+        console.error('播放视频时出错:', error);
+        alert('播放视频时出现错误，请检查视频文件是否存在');
+      });
+    }
+  }
+
+  function pauseVideo() {
+    const video = document.getElementById('underwater-video');
+    if (video) {
+      video.pause();
+      console.log('视频已暂停');
+    }
+  }
+
+  function restartVideo() {
+    const video = document.getElementById('underwater-video');
+    if (video) {
+      video.currentTime = 0;
+      video.play().then(() => {
+        console.log('视频重新开始播放');
+      }).catch(error => {
+        console.error('重新播放视频时出错:', error);
+        alert('重新播放视频时出现错误');
+      });
+    }
   }
 
   // 在初始化时调用预测功能初始化
